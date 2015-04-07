@@ -1,0 +1,19 @@
+{
+  "selectAllStrings": "select strings from test.typesTable",
+  "selectAllDates": "select dates from test.typesTable",
+  "selectAllNumbers": "select numbers from test.typesTable",
+  "selectAllGuids": "select guids from test.typesTable",
+  "selectAll": "select strings, dates, numbers, guids from test.typesTable",
+  "data": [
+    { "strings": "Josiah", "dates": "2015-10-22T15:41:27", "numbers": 961, "guids": "D2E327BF-712F-31F2-60BF-7FA0BDC19342" },
+    { "strings": "Wynne", "dates": "2015-02-13T20:45:16", "numbers": 115, "guids": "133071CF-8397-8E10-0731-B853C801A21B"},
+    { "strings": "Camilla", "dates": "2014-08-23T07:13:05", "numbers": 346, "guids": "511AF1CD-7B7B-30CB-145D-D607CCDFC7BA"},
+    { "strings": "Marvin", "dates": "2014-10-28T03:53:12", "numbers": 172, "guids": "B83A4D54-5186-5B7C-86DA-4B72919225F4"},
+    { "strings": "Lamar", "dates": "2014-09-21T00:04:31", "numbers": 958, "guids": "C5F28DE3-89AC-7875-FA69-16287A5F0CE3"},
+    { "strings": "Laith", "dates": "2016-02-07T18:30:12", "numbers": 52, "guids": "B212F46C-1A7B-620B-1C4B-21BCF7FE6277"},
+    { "strings": "Colette", "dates": "2015-11-07T16:39:42", "numbers": 112, "guids": "ED329ADB-4E6F-7204-0658-1A57C353987B"},
+    { "strings": "Claire", "dates": "2014-04-03T14:18:54", "numbers": 592, "guids": "E0E8F00E-0FF9-98A2-8C83-40E41250CFED"},
+    { "strings": "Jameson", "dates": "2016-02-13T11:11:15", "numbers": 90, "guids": "846A9135-94B9-82A3-96D5-C10BCAA15B3C"},
+    { "strings": "Aileen", "dates": "2015-01-08T07:29:43", "numbers": 91, "guids": "AC4B9C83-7555-B543-F389-8D6FF056A48D"}
+  ]
+}

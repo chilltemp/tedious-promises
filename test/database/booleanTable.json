@@ -1,0 +1,30 @@
+{
+  "selectAllNumbers": "select numbers from test.booleanTable where numbers is not null",
+  "selectAllStrings": "select strings from test.booleanTable where strings is not null",
+  "selectNulls": "select numbers, strings from test.booleanTable where numbers is null or strings is null",
+  "data": [
+    { "numbers": true, "strings": true },
+    { "numbers": true, "strings": true },
+    { "numbers": true, "strings": true },
+    { "numbers": false, "strings": true },
+    { "numbers": false, "strings": true },
+    { "numbers": false, "strings": false },
+    { "numbers": true, "strings": false },
+    { "numbers": true, "strings": false },
+    { "numbers": true, "strings": false },
+    { "numbers": true, "strings": false },
+    { "numbers": true, "strings": true },
+    { "numbers": true, "strings": true },
+    { "numbers": true, "strings": true },
+    { "numbers": true, "strings": false },
+    { "numbers": false, "strings": false },
+    { "numbers": false, "strings": false },
+    { "numbers": false, "strings": false },
+    { "numbers": false, "strings": false },
+    { "numbers": false, "strings": false },
+    { "numbers": false, "strings": true }
+  ],
+  "dataNulls": [
+    { "numbers": null, "strings": null }
+  ]
+}

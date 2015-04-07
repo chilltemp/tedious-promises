@@ -1,0 +1,42 @@
+{
+  "name": "tedious-promises",
+  "version": "0.1.0",
+  "description": "Wraps Tedious SQL commands with Q promises.",
+  "author": "Charles Hill <s+tedious@chillweb.net>"
+  "repository": "chilltemp/tedious-promises",
+  "license": "MIT",
+  "files": [
+    "src"
+  ],
+  "main": "src/index.js",
+  "keywords": [
+    "tedious",
+    "promises",
+    "sql",
+    "q"
+  ],
+  "dependencies": {
+    "lodash": "^3.5.0",
+    "lodash-deep": "^1.5.3",
+    "q": "^1.2.0",
+    "tedious": "^1.11.0"
+  },
+  "devDependencies": {
+    "chalk": "^1.0.0",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-jasmine-node": "^0.2.1",
+    "grunt-jasmine-node-coverage": "^0.4.1",
+    "jasmine-node": "^1.14.5",
+    "jshint-stylish": "^1.0.1",
+    "load-grunt-tasks": "^3.1.0",
+    "tedious-connection-pool": "^0.3.5",
+    "time-grunt": "^1.1.0"
+  },
+  "scripts": {
+    "test": "grunt"
+  }
+}
