@@ -8,3 +8,5 @@ var defaultInstance = new module.exports.TediousPromises();
 module.exports.sql = defaultInstance.sql;
 module.exports.setConnectionPool = defaultInstance.setConnectionPool;
 module.exports.setConnectionConfig = defaultInstance.setConnectionConfig;
+module.exports.setMockDataCallback = defaultInstance.setMockDataCallback;
+module.exports.setDefaultColumnRenamer = defaultInstance.setDefaultColumnRenamer;
