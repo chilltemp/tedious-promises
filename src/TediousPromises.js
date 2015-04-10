@@ -51,12 +51,27 @@ TediousPromises.prototype.setMockDataCallback = function(callback) {
   return this;
 };
 
+TediousPromises.prototype.setDefaultColumnRenamer = function(renameFunction) {
+  if(!_.isFunction(renameFunction)) {
+    throw 'Argument must be a function.';
+  }
+
+  this._renameFunction = renameFunction;
+  return this;
+};
+
 TediousPromises.prototype.sql = function(sql) {
   if(!this._mode || !this._option) {
     throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
   }
 
-  return (new TediousPromise(this._mode, this._option)).sql(sql);
+  var tp = new TediousPromise(this._mode, this._option);
+
+  if(_.isFunction(this._renameFunction)) {
+    tp.defaultColumnRenamer = this._renameFunction;
+  }
+
+  return tp.sql(sql);
 };
 
 module.exports = TediousPromises;

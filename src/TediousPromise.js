@@ -34,6 +34,10 @@ function TediousPromise(mode, option) {
   // Should only be set when the last function called created a column
   // Must reset to null on other functions
   this._lastColumn = null;
+
+  // function to rename columns if the name wasn't manually overriden
+  // i.e.:  _.camelCase
+  this.defaultColumnRenamer = null;
 }
 
 function enableDebugLogging(connection) {
@@ -148,7 +152,12 @@ TediousPromise.prototype._executeRequest = function(connection) {
 
         if(!map) {
           // create default mapping if needed
-          map = new TediousPromiseColumn(col.metadata.colName);
+          if(_.isFunction(this.defaultColumnRenamer)) {
+            map = new TediousPromiseColumn(col.metadata.colName, this.defaultColumnRenamer(col.metadata.colName));
+          } else {
+            map = new TediousPromiseColumn(col.metadata.colName);
+          }
+
           this._columns[col.metadata.colName] = map;
         }
 
@@ -199,6 +208,9 @@ TediousPromise.prototype.column = function(name, mapping) {
 
   if(mapping instanceof TediousPromiseColumn) {
     map = mapping;
+
+  } else if(typeof mapping === 'undefined' && _.isFunction(this.defaultColumnRenamer)) {
+    map = new TediousPromiseColumn(name, this.defaultColumnRenamer(name));
 
   } else if(typeof mapping === 'undefined' || typeof mapping === 'string') {
     map = new TediousPromiseColumn(name, mapping);

@@ -361,6 +361,69 @@ describe('tedious-promises', function () {
         }).fin(done);
     });
 
+    it('should not rename columns unless asked to', function(done) {
+      // ignore 'not cammel case' warnings
+      /*jshint -W106 */
+      var data = [
+        {
+          col_one: 123,
+          col_two: 'row 1'
+        }, {
+          col_one: 456,
+          col_two: 'row 2'
+        }
+      ];
+      /*jshint +W106 */
+
+      var tp = new TediousPromises()
+        .setMockDataCallback(function() { return data; });
+
+      tp.sql('bad sql to cause a failure')
+        .execute()
+        .then(function(result) {
+          expect(result).toEqual(data);
+        }).fail(function(err) {
+          self.fail(err);
+        }).fin(done);
+    });
+
+    it('should rename columns when asked to', function(done) {
+      // ignore 'not cammel case' warnings
+      /*jshint -W106 */
+      var data = [
+        {
+          col_one: 123,
+          col_two: 'row 1'
+        }, {
+          col_one: 456,
+          col_two: 'row 2'
+        }
+      ];
+      /*jshint +W106 */
+
+      var renamedData = [
+        {
+          colOne: 123,
+          colTwo: 'row 1'
+        }, {
+          colOne: 456,
+          colTwo: 'row 2'
+        }
+      ];
+
+      var tp = new TediousPromises()
+        .setDefaultColumnRenamer(_.camelCase)
+        .setMockDataCallback(function() { return data; });
+
+      tp.sql('bad sql to cause a failure')
+        .execute()
+        .then(function(result) {
+          expect(result).toEqual(renamedData);
+        }).fail(function(err) {
+          self.fail(err);
+        }).fin(done);
+    });
+
   }); // describe with mock callback
 
 }); // describe tedious-promises
