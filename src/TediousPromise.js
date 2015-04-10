@@ -2,18 +2,29 @@
 var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
 var TediousPromiseColumn = require('./TediousPromiseColumn');
+var MockTediousConnection = require('./MockTediousConnection');
 var q = require('q');
 var _ = require('lodash');
 
 
 
-function TediousPromise(poolOrConfig) {
+function TediousPromise(mode, option) {
   // TODO: Transaction support - Accept an open transaction on the constructor
-  if(typeof poolOrConfig.acquire === 'function') {
-    this._connectionPool = poolOrConfig;
+
+  if(mode === 'pool' && _.isObject(option) && _.isFunction(option.acquire)) {
+    this._connectionPool = option;
+
+  } else if(mode === 'single' && _.isObject(option)) {
+    this._connectionConfig = option;
+
+  } else if(mode === 'mock' && _.isFunction(option)) {
+    this._mockDataCallback = option;
+
   } else {
-    this._connectionConfig = poolOrConfig;
+    throw 'Invalid arguments.  Mode must be "pool", "single", or "mock"; with an "option" of the correct type.';
   }
+
+  this._mode = mode;
   this._sql = null;
   this._columns = {};
   this._parameters = {};
@@ -38,7 +49,10 @@ TediousPromise.prototype._createConnection = function() {
   // TODO: Transaction support - if transaction, resolve with transaction's connection
   var differed = q.defer();
 
-  if(this._connectionPool) {
+  if(this._mode === 'mock') {
+    return q(new MockTediousConnection(this));
+
+  } else if(this._mode === 'pool') {
     // get from pool
     this._connectionPool.acquire(function (err, connection) {
       try {
@@ -54,7 +68,7 @@ TediousPromise.prototype._createConnection = function() {
       }
     });
 
-  } else if (this._connectionConfig) {
+  } else if (this._mode === 'single') {
     // create new connection
     var connection = new Connection(this._connectionConfig);
 
@@ -73,7 +87,7 @@ TediousPromise.prototype._createConnection = function() {
     });
 
   } else {
-    throw new Error('Invalid configuration.  Connection pool or config required.');
+    throw new Error('Create connection not implemented for mode: ' + this._mode + '.');
   }
 
   return differed.promise;
@@ -82,11 +96,20 @@ TediousPromise.prototype._createConnection = function() {
 TediousPromise.prototype._disposeConnection = function(connection) {
   // TODO: Transaction support - if transaction, do nothing
 
-  if(!!connection && _.isFunction(connection.release)) {
-    // release from connection pool
-    connection.release();
-  } else {
+  if(this._mode === 'mock') {
+    return; // nothing to do for the mock
+
+  } else if(this._mode === 'pool') {
+    if(_.isFunction(connection.release)) {
+      // release from connection pool
+      connection.release();
+    }
+
+  } else if (this._mode === 'single') {
     connection.close();
+
+  } else {
+    throw new Error('Dispose connection not implemented for mode: ' + this._mode + '.');
   }
 
 };
@@ -103,7 +126,6 @@ TediousPromise.prototype._executeRequest = function(connection) {
         differed.reject(error);
         return;
       } else {
-        console.log(rowCount);
 
         if(this._forEachRow) {
           differed.resolve();
@@ -225,10 +247,14 @@ TediousPromise.prototype.forEachRow = function(callback) {
 TediousPromise.prototype.execute = function() {
   this._lastColumn = null;
 
-  return this._createConnection()
-  .then(function(connection) {
-    return this._executeRequest(connection);
-  }.bind(this));
+  if(_.isFunction(this.mockExecute)) {
+    return q(this.mockExecute(this._sql, this._outputParameters));
+  } else {
+    return this._createConnection()
+    .then(function(connection) {
+      return this._executeRequest(connection);
+    }.bind(this));
+  }
 };
 
 

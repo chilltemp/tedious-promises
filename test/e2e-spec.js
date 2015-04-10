@@ -1,5 +1,6 @@
 'use strict';
 var chalk = require('chalk');
+var Connection = require('tedious').Connection;
 var TYPES = require('tedious').TYPES;
 var tediousPromises = require('../src');
 var TediousPromises = tediousPromises.TediousPromises;
@@ -261,8 +262,8 @@ describe('tedious-promises', function () {
         self.fail('should be unreachable');
       } catch(e) {
         expect(e instanceof Error).toEqual(true);
-        expect(e.message).toMatch(/config/);
-        expect(e.message).toMatch(/pool/);
+        expect(e.message).toMatch(/config/i);
+        expect(e.message).toMatch(/pool/i);
       }
     });
 
@@ -276,7 +277,6 @@ describe('tedious-promises', function () {
 
     beforeEach(function() {
       if(!ConnectionPool) {
-console.log('INIT POOL');
         ConnectionPool = require('tedious-connection-pool');
 
         var poolConfig = {
@@ -305,5 +305,62 @@ console.log('INIT POOL');
         }).fin(done);
     });
   }); // describe with connection pooling
+
+  describe('with mock callback', function() {
+
+    it('should not call the real execute method', function(done) {
+      var executeSpy = spyOn(Connection.prototype, 'execSql');
+
+      var tp = new TediousPromises()
+        .setMockDataCallback(function() { return []; });
+
+      tp.sql('bad sql to cause a failure')
+        .execute()
+        .then(function() {
+          expect(executeSpy).not.toHaveBeenCalled();
+        }).fail(function(err) {
+          self.fail(err);
+        }).fin(done);
+    });
+
+    it('should call the mock data function', function(done) {
+      var spy = jasmine.createSpy().andReturn([]);
+
+      var tp = new TediousPromises()
+        .setMockDataCallback(spy);
+
+      tp.sql('something sql')
+        .execute()
+        .then(function(result) {
+          expect(spy).toHaveBeenCalledWith('something sql', jasmine.any(Object));
+        }).fail(function(err) {
+          self.fail(err);
+        }).fin(done);
+    });
+
+    it('should return the mocked data', function(done) {
+      var data = [
+        {
+          col1: 123,
+          col2: 'row 1'
+        }, {
+          col1: 456,
+          col2: 'row 2'
+        }
+      ];
+
+      var tp = new TediousPromises()
+        .setMockDataCallback(function() { return data; });
+
+      tp.sql('bad sql to cause a failure')
+        .execute()
+        .then(function(result) {
+          expect(result).toEqual(data);
+        }).fail(function(err) {
+          self.fail(err);
+        }).fin(done);
+    });
+
+  }); // describe with mock callback
 
 }); // describe tedious-promises

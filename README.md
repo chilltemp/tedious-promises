@@ -57,9 +57,15 @@ function getData(id) {
     .execute();
 }
 ```
+
+## Mocking for unit tests
+tp.
+
 ## To do
 * documentation
 * sql generation and/or integration of a LINQ package
+* local unit tests (current tests require a real database)
+* more tests for the mock connection
 
 ## License
 

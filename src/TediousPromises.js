@@ -4,8 +4,8 @@ var _ = require('lodash');
 
 
 function TediousPromises() {
-  this._connectionPool = null;
-  this._connectionConfig = null;
+  this._mode = null;
+  this._option = null;
 }
 
 TediousPromises.prototype.setConnectionPool = function(connectionPool) {
@@ -17,7 +17,8 @@ TediousPromises.prototype.setConnectionPool = function(connectionPool) {
     throw new Error('Cannot set both the connection pool and individual connection configuration.');
   }
 
-  this._connectionPool = connectionPool;
+  this._mode = 'pool';
+  this._option = connectionPool;
   return this;
 };
 
@@ -30,21 +31,32 @@ TediousPromises.prototype.setConnectionConfig = function(connectionConfig) {
     throw new Error('Cannot set both the connection pool and individual connection configuration.');
   }
 
-  this._connectionConfig = connectionConfig;
+  this._mode = 'single';
+  this._option = connectionConfig;
+  return this;
+};
+
+  // A mock function to be called instead of an actual database call.
+  // function(sql, outputParameters) { }
+  //   sql: SQL that would have been executed
+  //   outputPatamters: SQL parameter dictionary
+  //   returns: the resulting collection of objects whose properties are named after the database columns
+TediousPromises.prototype.setMockDataCallback = function(callback) {
+  if(!_.isFunction(callback)) {
+    throw 'Argument must be a function.';
+  }
+
+  this._mode = 'mock';
+  this._option = callback;
   return this;
 };
 
 TediousPromises.prototype.sql = function(sql) {
-  var tdp;
-  if(this._connectionPool) {
-    tdp = new TediousPromise(this._connectionPool);
-  } else if(this._connectionConfig) {
-    tdp = new TediousPromise(this._connectionConfig);
-  } else {
-    throw new Error('Must set either the connection pool or connection config first.');
+  if(!this._mode || !this._option) {
+    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
   }
 
-  return tdp.sql(sql);
+  return (new TediousPromise(this._mode, this._option)).sql(sql);
 };
 
 module.exports = TediousPromises;
