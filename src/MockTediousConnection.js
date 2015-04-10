@@ -13,7 +13,7 @@ MockTediousConnection.prototype.execSql = function(request) {
   var rowCount = 0;
 
   try {
-    data = this._tediousPormise._mockDataCallback(this._tediousPormise._sql, this._tediousPormise._outputParameters);
+    data = this._tediousPormise._mockDataCallback(this._tediousPormise._sql, this._tediousPormise._parameters);
   } catch(e) {
     request.userCallback(e, rowCount);
     return;
