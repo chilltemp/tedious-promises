@@ -1,4 +1,4 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+#  [![Dependency Status][daviddm-image]][daviddm-url]
 
 > Wraps Tedious SQL commands with Q promises.
 > Uses fluent syntax 
@@ -10,9 +10,9 @@ $ npm install --save tedious-promises
 ```
 
 
-## Usage
+## Configure
 
-Sample: config.json See the Tedious documentation for configuration details.
+### Sample: config.json See the Tedious documentation for configuration details.
 ```json
 {
   "userName": "user",
@@ -25,20 +25,35 @@ Sample: config.json See the Tedious documentation for configuration details.
 }
 ```
 
-Initialization without connection pooling
+### Initialization without connection pooling
 ```js
 var tp = require('tedious-promises');
 var dbConfig = require('config.json');
 var TYPES = require('tedious').TYPES;
-tp.setConnectionConfig(dbConfig);
+tp.setConnectionConfig(dbConfig); // global scope
 ```
 
-Initialization with connection pooling
+### Initialization with connection pooling
 ```js
-TBD
+var tp = require('tedious-promises');
+var dbConfig = require('config.json');
+var TYPES = require('tedious').TYPES;
+var ConnectionPool = require('tedious-connection-pool');
+var poolConfig = {}; // see tedious-connection-pool documentation
+var pool = new ConnectionPool(poolConfig, dbConfig);
+tp.setConnectionPool(pool); // global scope
 ```
 
-Basic usage
+### Configure automatic column renaming
+The callback can be any function that accepts a single string parameter, and returns a string.
+```js
+var _ = require('lodash');
+tp.setDefaultColumnRenamer(_.camelCase); // global scope
+```
+
+
+## Use
+### Basic usage
 ```js
 tp.sql("SELECT col1, col2 FROM dbo.table")
   .execute()
@@ -46,10 +61,59 @@ tp.sql("SELECT col1, col2 FROM dbo.table")
     // do something with the results
   }).fail(function(err) {
     // do something with the failure
-  }).fin(done);
+  });
+  
+  
+results === [{
+  col1: 'row 1 col 1',
+  col2: 'row 1 col 2'
+}, {
+  col1: 'row 2 col 1',
+  col2: 'row 2 col 2'
+}]
 ```
 
-In a function returning the promise, with a parameter
+### Overriding column behavior
+```js
+tp.sql("SELECT col1, col2, col3, col4 FROM dbo.table")
+  .column('col1', 'firstName') // rename column
+  .column('col2', 'lastName')
+  .column('col3', 'nameParts.first') // create 'nameParts' object with 'first' property
+  .column('col4', 'nameParts.last')
+  .execute()
+  .then(function(results) {
+    // do something with the results
+  }).fail(function(err) {
+    // do something with the failure
+  });
+```
+
+### Column types conversion
+asBoolean can convert from:
+* null === null
+* Any integer: 0 === false
+* strings:
+** 'TRUE','T', 'Y', 'YES', '1'
+** 'FALSE', 'F', 'N', 'NO', '0'
+
+asDate can convert from:
+* null === null
+* integer: new Date(value)
+* string: Date.parse(value)
+
+```js
+tp.sql("SELECT col1, col2 FROM dbo.table")
+  .column('col1').asBoolean()
+  .column('col2').asDate()
+  .execute()
+  .then(function(results) {
+    // do something with the results
+  }).fail(function(err) {
+    // do something with the failure
+  });
+```
+
+### In a function returning the promise, with a parameter
 ```js
 function getData(id) {
   return tp.sql("SELECT col1, col2, FROM table WHERE id_col = @id")
@@ -59,13 +123,34 @@ function getData(id) {
 ```
 
 ## Mocking for unit tests
-tp.
+Set the global mock function instead of setConnectionConfig or setConnectionPool to intercept all calls to tp.execute()
+```js
+tp.setMockDataCallback(function(sql, parameters) { 
+  if(sql === 'Select...' && parameters.id.value === 123) {
+    return data; // an array of the objects you'd normally get back 
+  }
+  
+  return [];
+});
+
+
+parameters === {
+  id: {
+    name: 'id',
+    type: TYPES.Int,
+    value: 123,
+    options: null
+  }
+}
+```
 
 ## To do
 * documentation
 * sql generation and/or integration of a LINQ package
 * local unit tests (current tests require a real database)
 * more tests for the mock connection
+* \[\!\[NPM version\]\[npm-image\]\]\[npm-url\] 
+* \[\!\[Build Status\]\[travis-image\]\]\[travis-url\] 
 
 ## License
 
