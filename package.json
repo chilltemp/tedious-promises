@@ -2,7 +2,7 @@
   "name": "tedious-promises",
   "version": "0.1.0",
   "description": "Wraps Tedious SQL commands with Q promises.",
-  "author": "Charles Hill <s+tedious@chillweb.net>",
+  "author": "Charles Hill <code@chillweb.net>",
   "repository": "chilltemp/tedious-promises",
   "license": "MIT",
   "files": [
