@@ -424,6 +424,21 @@ describe('tedious-promises', function () {
         }).fin(done);
     });
 
+    it('mock data that isnt an array should fail gracefully', function(done) {
+      var tp = new TediousPromises()
+        .setDefaultColumnRenamer(_.camelCase)
+        .setMockDataCallback(function() { return 'bad data'; });
+
+      tp.sql('bad sql to cause a failure')
+        .execute()
+        .then(function(result) {
+          self.fail('should not be called');
+       }).fail(function(err) {
+          expect(err instanceof Error).toEqual(true);
+        }).fin(done);
+    });
+
+
   }); // describe with mock callback
 
 }); // describe tedious-promises

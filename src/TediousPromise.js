@@ -259,14 +259,10 @@ TediousPromise.prototype.forEachRow = function(callback) {
 TediousPromise.prototype.execute = function() {
   this._lastColumn = null;
 
-  if(_.isFunction(this.mockExecute)) {
-    return q(this.mockExecute(this._sql, this._outputParameters));
-  } else {
-    return this._createConnection()
-    .then(function(connection) {
-      return this._executeRequest(connection);
-    }.bind(this));
-  }
+  return this._createConnection()
+  .then(function(connection) {
+    return this._executeRequest(connection);
+  }.bind(this));
 };
 
 

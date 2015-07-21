@@ -14,31 +14,36 @@ MockTediousConnection.prototype.execSql = function(request) {
 
   try {
     data = this._tediousPormise._mockDataCallback(this._tediousPormise._sql, this._tediousPormise._parameters);
-  } catch(e) {
-    request.userCallback(e, rowCount);
-    return;
-  }
 
-  if(_.isArray(data)) {
+    if(typeof data === 'undefined' || data === null) {
+      // do nothing
 
-    var makeColumn = function(value, key) {
-      row.push({
-        metadata: {
-          colName: key
-        },
-        value: value
-      });
-    };
+    } else if(_.isArray(data)) {
 
-    for (var i = 0; i < data.length; i++) {
-      var row = [];
-      _.forIn(data[i], makeColumn);
+      var makeColumn = function(value, key) {
+        row.push({
+          metadata: {
+            colName: key
+          },
+          value: value
+        });
+      };
 
-      // Warning: _events is a private object of a tedious Request, may change
-      request._events.row(row);
+      for (var i = 0; i < data.length; i++) {
+        var row = [];
+        _.forIn(data[i], makeColumn);
+
+        // Warning: _events is a private object of a tedious Request, may change
+        request._events.row(row);
+      }
+
+    } else {
+      throw new Error('Mock data must be an array of rows or null.');
     }
 
     request.userCallback(null, rowCount);
+  } catch(e) {
+    request.userCallback(e, rowCount);
   }
 };
 
