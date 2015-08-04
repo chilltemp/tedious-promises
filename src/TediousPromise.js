@@ -118,7 +118,13 @@ TediousPromise.prototype._disposeConnection = function(connection) {
 
 };
 
-TediousPromise.prototype._executeRequest = function(connection) {
+TediousPromise.prototype._handleOutputParameter = function(parameterName, value, metadata) {
+  if(this._outputParameters.hasOwnProperty(parameterName) && _.isFunction(this._outputParameters[parameterName].callback)) {
+    this._outputParameters[parameterName].callback(value, metadata);
+  }
+};
+
+TediousPromise.prototype._executeRequest = function(connection, fnName) {
   var differed = q.defer();
   var results = [];
 
@@ -174,6 +180,14 @@ TediousPromise.prototype._executeRequest = function(connection) {
     }
   }.bind(this));
 
+  request.on('returnValue', function(parameterName, value, metadata) {
+    try{
+      this._handleOutputParameter(parameterName, value, metadata);
+    } catch(e) {
+      differed.reject(e);
+    }
+  }.bind(this));
+
   _.forEach(this._parameters, function(p) {
     request.addParameter( p.name, p.type, p.value, p.options);
   });
@@ -182,7 +196,12 @@ TediousPromise.prototype._executeRequest = function(connection) {
     request.addOutputParameter( p.name, p.type, p.value, p.options);
   });
 
-  connection.execSql(request);
+  if(fnName === 'callProcedure') {
+    connection.callProcedure(request);
+  } else {
+    connection.execSql(request);
+  }
+
   return differed.promise;
 };
 
@@ -235,13 +254,25 @@ TediousPromise.prototype.parameter = function(name, type, value, options) {
   return this;
 };
 
-TediousPromise.prototype.outputParameter = function(name, type, value, options) {
-  this._outputParameters[name] = {
-    name: name,
-    type: type,
-    value: value,
-    options: options
-  };
+TediousPromise.prototype.outputParameter = function(name, type, value, options, callback) {
+  if(_.isFunction(value) && typeof options === 'undefined' && typeof callback === 'undefined') {
+    // (name, type, callback)
+    this._outputParameters[name] = {
+      name: name,
+      type: type,
+      callback: value
+    };
+  } else {
+    // (name, type, value, options, callback)
+    this._outputParameters[name] = {
+      name: name,
+      type: type,
+      value: value,
+      options: options,
+      callback: callback
+    };
+  }
+
   this._lastColumn = null;
   return this;
 };
@@ -265,6 +296,14 @@ TediousPromise.prototype.execute = function() {
   }.bind(this));
 };
 
+TediousPromise.prototype.callProcedure = function() {
+  this._lastColumn = null;
+
+  return this._createConnection()
+  .then(function(connection) {
+    return this._executeRequest(connection, 'callProcedure');
+  }.bind(this));
+};
 
 
 // Passthru to some column functions

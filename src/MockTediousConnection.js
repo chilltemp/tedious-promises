@@ -11,9 +11,13 @@ MockTediousConnection.prototype.execSql = function(request) {
 
   var data = null;
   var rowCount = 0;
+  
+  var scope = {
+    outputParameter: this._tediousPormise._handleOutputParameter.bind(this._tediousPormise)
+  };
 
   try {
-    data = this._tediousPormise._mockDataCallback(this._tediousPormise._sql, this._tediousPormise._parameters);
+    data = this._tediousPormise._mockDataCallback.call(scope, this._tediousPormise._sql, this._tediousPormise._parameters);
 
     if(typeof data === 'undefined' || data === null) {
       // do nothing
@@ -45,6 +49,10 @@ MockTediousConnection.prototype.execSql = function(request) {
   } catch(e) {
     request.userCallback(e, rowCount);
   }
+};
+
+MockTediousConnection.prototype.callProcedure = function(request) {
+  this.execSql(request);
 };
 
 module.exports = MockTediousConnection;
