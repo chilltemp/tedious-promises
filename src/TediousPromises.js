@@ -74,4 +74,60 @@ TediousPromises.prototype.sql = function(sql) {
   return tp.sql(sql);
 };
 
+TediousPromises.prototype.beginTransaction = function() {
+  if(!this._mode || !this._option) {
+    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
+  }
+
+  var tp = new TediousPromise(this._mode, this._option);
+
+  if(_.isFunction(this._renameFunction)) {
+    tp.defaultColumnRenamer = this._renameFunction;
+  }
+
+  return tp.beginTransaction();
+};
+
+TediousPromises.prototype.rollbackTransaction = function() {
+  if(!this._mode || !this._option) {
+    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
+  }
+
+  var tp = new TediousPromise(this._mode, this._option);
+
+  if(_.isFunction(this._renameFunction)) {
+    tp.defaultColumnRenamer = this._renameFunction;
+  }
+
+  return tp.rollbackTransaction();
+};
+
+TediousPromises.prototype.saveTransaction = function() {
+  if(!this._mode || !this._option) {
+    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
+  }
+
+  var tp = new TediousPromise(this._mode, this._option);
+
+  if(_.isFunction(this._renameFunction)) {
+    tp.defaultColumnRenamer = this._renameFunction;
+  }
+
+  return tp.saveTransaction();
+};
+
+TediousPromises.prototype.commitTransaction = function() {
+  if(!this._mode || !this._option) {
+    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
+  }
+
+  var tp = new TediousPromise(this._mode, this._option);
+
+  if(_.isFunction(this._renameFunction)) {
+    tp.defaultColumnRenamer = this._renameFunction;
+  }
+
+  return tp.commitTransaction();
+};
+
 module.exports = TediousPromises;

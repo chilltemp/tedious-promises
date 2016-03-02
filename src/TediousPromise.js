@@ -10,7 +10,7 @@ var _ = require('lodash');
 
 function TediousPromise(mode, option) {
   // TODO: Transaction support - Accept an open transaction on the constructor
-
+  
   if(mode === 'pool' && _.isObject(option) && _.isFunction(option.acquire)) {
     this._connectionPool = option;
 
@@ -49,52 +49,113 @@ function enableDebugLogging(connection) {
   // connection.on('end', function() { console.log('END'); });
 }
 
+TediousPromise.prototype.beginTransaction = function() {
+    return this._createConnection()
+        .then(function(connection) {
+            var deferred = q.defer();
+            this._connection = connection;
+            connection.beginTransaction(function(err) {
+                this._transaction = true;
+                if (err) {
+                    deferred.reject(err);
+                } else {
+                    deferred.resolve(this);   
+                }
+            }.bind(this));
+            return deferred.promise;
+        }.bind(this));
+};
+
+TediousPromise.prototype.commitTransaction = function() {
+    var deferred = q.defer();
+    this._connection.commitTransaction(function(err) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            this._transaction = false;
+            this._disposeConnection(this._connection);
+            deferred.resolve();   
+        }
+    }.bind(this));
+    return deferred.promise;
+};
+
+TediousPromise.prototype.saveTransaction = function() {
+    var deferred = q.defer();
+    this._connection.saveTransaction(function(err) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve();   
+        }
+    }.bind(this));
+    return deferred.promise;
+};
+
+TediousPromise.prototype.rollbackTransaction = function() {
+    var deferred = q.defer();
+    this._connection.rollbackTransaction(function(err) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            this._transaction = false;
+            this._disposeConnection(this._connection);
+            deferred.resolve();   
+        }
+    }.bind(this));
+    return deferred.promise;
+};
+
 TediousPromise.prototype._createConnection = function() {
   // TODO: Transaction support - if transaction, resolve with transaction's connection
-  var differed = q.defer();
+  var deferred = q.defer();
 
-  if(this._mode === 'mock') {
-    return q(new MockTediousConnection(this));
-
-  } else if(this._mode === 'pool') {
-    // get from pool
-    this._connectionPool.acquire(function (err, connection) {
-      try {
-        if (err) {
-          connection.release();
-          differed.reject(err);
-        } else {
-          enableDebugLogging(connection);
-          differed.resolve(connection);
-        }
-      } catch(e) {
-        differed.reject(e);
-      }
-    });
-
-  } else if (this._mode === 'single') {
-    // create new connection
-    var connection = new Connection(this._connectionConfig);
-
-    connection.on('connect', function(err) {
-      try {
-        if (err) {
-          connection.close();
-          differed.reject(err);
-        } else {
-          enableDebugLogging(connection);
-          differed.resolve(connection);
-        }
-      } catch(e) {
-        differed.reject(e);
-      }
-    });
-
+  if(this._connection) { // existing connection found
+     deferred.resolve(this._connection);
   } else {
-    throw new Error('Create connection not implemented for mode: ' + this._mode + '.');
+    if(this._mode === 'mock') {
+        return q(new MockTediousConnection(this));
+
+    } else if(this._mode === 'pool') {
+        // get from pool
+        this._connectionPool.acquire(function (err, connection) {
+        try {
+            if (err) {
+            connection.release();
+            deferred.reject(err);
+            } else {
+            enableDebugLogging(connection);
+            deferred.resolve(connection);
+            }
+        } catch(e) {
+            deferred.reject(e);
+        }
+        });
+
+    } else if (this._mode === 'single') {
+        // create new connection
+        var connection = new Connection(this._connectionConfig);
+
+        connection.on('connect', function(err) {
+        try {
+            if (err) {
+            connection.close();
+            deferred.reject(err);
+            } else {
+            enableDebugLogging(connection);
+            deferred.resolve(connection);
+            }
+        } catch(e) {
+            deferred.reject(e);
+        }
+        });
+
+    } else {
+        throw new Error('Create connection not implemented for mode: ' + this._mode + '.');
+    }
   }
 
-  return differed.promise;
+  return deferred.promise;
 };
 
 TediousPromise.prototype._disposeConnection = function(connection) {
@@ -125,26 +186,27 @@ TediousPromise.prototype._handleOutputParameter = function(parameterName, value,
 };
 
 TediousPromise.prototype._executeRequest = function(connection, fnName) {
-  var differed = q.defer();
+  var deferred = q.defer();
   var results = [];
 
   var request = new Request(this._sql, function(error, rowCount) {
     try {
-      this._disposeConnection(connection);
-
+      if (!this._transaction) this._disposeConnection(connection);
+      else this._sql = null;
+      
       if (error) {
-        differed.reject(error);
+        deferred.reject(error);
         return;
       } else {
 
         if(this._forEachRow) {
-          differed.resolve();
+          deferred.resolve();
         } else {
-          differed.resolve(results);
+          deferred.resolve(results);
         }
       }
     } catch(e) {
-      differed.reject(e);
+      deferred.reject(e);
     }
   }.bind(this));
 
@@ -176,7 +238,7 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
         results.push(result);
       }
     } catch(e) {
-      differed.reject(e);
+      deferred.reject(e);
     }
   }.bind(this));
 
@@ -184,7 +246,7 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
     try{
       this._handleOutputParameter(parameterName, value, metadata);
     } catch(e) {
-      differed.reject(e);
+      deferred.reject(e);
     }
   }.bind(this));
 
@@ -202,7 +264,7 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
     connection.execSql(request);
   }
 
-  return differed.promise;
+  return deferred.promise;
 };
 
 
