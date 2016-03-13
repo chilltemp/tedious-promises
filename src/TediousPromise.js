@@ -370,7 +370,6 @@ TediousPromise.prototype.callProcedure = function() {
 
 // Passthru to some column functions
 function makePassthruFunction(name) {
-  console.log('Making passthru fn: '+name);
   return function() {
     if(!this._lastColumn) {
       throw new Error('This function can only be called after the column function.');
