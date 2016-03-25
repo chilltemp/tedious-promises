@@ -171,6 +171,30 @@ parameters === {
 }
 ```
 
+## Setup end to end testing
+1. Create a SQL database either in Azure or locally
+ * Sample user setup and permissions are in `test/database/init.sql`
+2. Create `test/database/config.json` based upon the sample below 
+ * Replace all `REQUIRED` fields with your database credentials
+ * This file is git ignored so that it isn't accidently checked in
+3. Run `grunt resetTestDatabase` to create the tables and populate test data
+4. Run `grunt` to run the tests, or `grunt watch` to run the test on every file change
+
+```json
+{
+  "userName": "REQUIRED",
+  "password": "REQUIRED",
+  "server": "REQUIRED",
+  "options": {
+    "database": "REQUIRED",
+    "encrypt": true,
+    "debug": {
+      "packet": false
+    }
+  }
+}
+```
+
 ## To do
 * documentation
 * sql generation and/or integration of a LINQ package
