@@ -6,6 +6,7 @@ var tediousPromises = require('../src');
 var TediousPromises = tediousPromises.TediousPromises;
 var _ = require('lodash');
 var q = require('q');
+var testDatabase = require('./database/resetTestDatabase');
 
 // This will give failing unit tests better stack traces if they use promises
 q.longStackSupport = true;
@@ -213,6 +214,7 @@ describe('tedious-promises', function () {
 
     it('for each row', function (done) {
       var cnt = 0;
+      var expectedRows = 10;
 
       tp.sql(simpleTable.selectRows1to10)
         .forEachRow(function(row) {
@@ -220,8 +222,9 @@ describe('tedious-promises', function () {
         })
         .execute()
         .then(function(results) {
-          // should be called, but the parameter should be undefined
-          expect(results).toBeUndefined();
+          // result is row count for .forEachRow
+          expect(results).toBe(expectedRows);
+          expect(cnt).toBe(expectedRows);
         }).fail(function(err) {
           self.fail(err);
         }).fin(done);
@@ -249,6 +252,32 @@ describe('tedious-promises', function () {
     });
 
 
+    describe('without transactions', function() {
+
+      beforeEach(function(done) {
+        testDatabase.resetTransactionsTableData()
+          .fail(function(err) {
+            self.fail(err);
+          }).fin(done);
+      });
+
+      /*jshint -W109 */
+      it('insert rows', function(done) {
+        var expectedRows = 1;
+
+        tp.sql("insert into test.transactionsTable (col1, col2) values('qwerty', '123')" )
+          .returnRowCount()
+          .execute()
+          .then(function(results) {
+            expect(results).toBe(expectedRows);
+          }).fail(function(err) {
+            self.fail(err);
+          }).fin(done);
+      });
+
+
+      /*jshint +W109 */
+    });
 
   }); // describe without connection pooling
 

@@ -30,6 +30,7 @@ function TediousPromise(mode, option) {
   this._parameters = {};
   this._outputParameters = {};
   this._forEachRow = null;
+  this._returnRowCount = false;
 
   // Should only be set when the last function called created a column
   // Must reset to null on other functions
@@ -202,8 +203,8 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
         return;
       } else {
 
-        if(this._forEachRow) {
-          deferred.resolve();
+        if(this._forEachRow || this._returnRowCount) {
+          deferred.resolve(rowCount);
         } else {
           deferred.resolve(results);
         }
@@ -270,7 +271,10 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
   return deferred.promise;
 };
 
-
+TediousPromise.prototype.returnRowCount = function() {
+  this._returnRowCount = true;
+  return this;
+};
 
 
 TediousPromise.prototype.sql = function(sql) {

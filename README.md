@@ -122,6 +122,33 @@ function getData(id) {
 }
 ```
 
+### Handeling each row yourself
+```js
+tp.sql("SELECT * FROM table")
+  .forEachRow(function(row) {
+    // do something with the row
+  })
+  .execute()
+  .then(function(results) {
+    // result is row count 
+  }).fail(function(err) {
+    // do something with the failure
+  });
+```
+
+### Return row count instead of data
+Only usefull for INSERT, UPDATE, and DELETE statements
+```js
+tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
+  .returnRowCount()
+  .execute()
+  .then(function(rowCount) {
+    // done, you have the modified row count
+  }).fail(function(err) {
+    // do something with the failure
+  });
+```
+
 ## Mocking for unit tests
 Set the global mock function instead of setConnectionConfig or setConnectionPool to intercept all calls to tp.execute()
 ```js
