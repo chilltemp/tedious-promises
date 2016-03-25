@@ -28,7 +28,7 @@ function execSql(sql) {
       deferred.resolve();
     });
     request.on('done', function(rowCount, more) {
-      console.log('Rows: ' + rowCount);
+      console.log(rowCount + ' rows modified');
       if(!more) {
         connection.close();
         deferred.resolve();
@@ -42,7 +42,7 @@ function execSql(sql) {
 }
 
 function execSqlFile(fileName) {
-  console.log('File: ' + fileName);
+  console.log('Executing sql file: ' + fileName);
 
   return q.nfcall(fs.readFile, path.join(__dirname, fileName), 'utf-8')
   .then(function(sqlStatements) {
@@ -55,11 +55,23 @@ function execSqlFile(fileName) {
 }
 
 module.exports.reset = function() {
-  return execSqlFile('simpleTable.sql')
-  .then(function() {
-    return execSqlFile('typesTable.sql');
-  })
-  .then(function() {
-    return execSqlFile('booleanTable.sql');
-  });
+  var files = [
+    'simpleTable.sql',
+    'typesTable.sql',
+    'booleanTable.sql',
+    'transactionsTable.sql',
+    'transactionsTableData.sql'
+  ];
+
+  // runs execSqlFile on each file, sequentially
+  // and returns the chain of promises
+  return files.reduce(function(promiseChain, file) {
+    return promiseChain.then(function(result) {
+      return execSqlFile(file);
+    });
+  }, q());
+};
+
+module.exports.resetTransactionsTableData = function() {
+  return execSqlFile('transactionsTableData.sql');
 };

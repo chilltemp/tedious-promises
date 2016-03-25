@@ -1,5 +1,5 @@
 'use strict';
-var database = require('./test/database/resetTestDatabase');
+var testDatabase = require('./test/database/resetTestDatabase');
 
 
 module.exports = function (grunt) {
@@ -77,7 +77,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('resetTestDatabase', function() {
     var done = this.async();
-    database.reset()
+    testDatabase.reset()
     .then(function() {
       done();
     })
