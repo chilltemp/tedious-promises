@@ -191,8 +191,11 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
 
   var request = new Request(this._sql, function(error, rowCount) {
     try {
-      if (!this._transaction) this._disposeConnection(connection);
-      else this._sql = null;
+      if (!this._transaction) {
+          this._disposeConnection(connection);
+      } else {
+          this._sql = null;
+      }
       
       if (error) {
         deferred.reject(error);

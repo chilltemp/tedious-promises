@@ -62,7 +62,7 @@ TediousPromises.prototype.setDefaultColumnRenamer = function(renameFunction) {
 
 TediousPromises.prototype.sql = function(sql) {
   if(!this._mode || !this._option) {
-    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
+    throw new Error('Must set the Connection Pool, Connection Config, or Mock Callback first.');
   }
 
   var tp = new TediousPromise(this._mode, this._option);
@@ -76,7 +76,7 @@ TediousPromises.prototype.sql = function(sql) {
 
 TediousPromises.prototype.beginTransaction = function() {
   if(!this._mode || !this._option) {
-    throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
+    throw new Error('Must set the Connection Pool, Connection Config, or Mock Callback first.');
   }
 
   var tp = new TediousPromise(this._mode, this._option);
