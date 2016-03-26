@@ -262,19 +262,72 @@ describe('tedious-promises', function () {
       });
 
       /*jshint -W109 */
-      it('insert rows', function(done) {
-        var expectedRows = 1;
+      it('insert row', function(done) {
+        var testSql = "insert into test.transactionsTable (col1, col2) values('qwerty', '123')";
+        var testExpectedResult = 1;
+        var verifySql = "select col1, col2 from test.transactionsTable where col1 = 'qwerty'";
+        var verifyExpectedResult = [ { col1 : 'qwerty', col2 : '123' } ];
 
-        tp.sql("insert into test.transactionsTable (col1, col2) values('qwerty', '123')" )
+        tp.sql(testSql)
           .returnRowCount()
           .execute()
-          .then(function(results) {
-            expect(results).toBe(expectedRows);
+          .then(function(testResult) {
+            expect(testResult).toEqual(testExpectedResult);
+
+            return tp.sql(verifySql)
+              .execute();
+          }).then(function(verifyResult) {
+            expect(verifyResult).toEqual(verifyExpectedResult);
           }).fail(function(err) {
             self.fail(err);
           }).fin(done);
       });
 
+      it('update row', function(done) {
+        var testSql = "update test.transactionsTable set col2 = '456' where col1 = 'BBB'";
+        var testExpectedResult = 1;
+        var verifySql = "select col1, col2 from test.transactionsTable where col1 = 'BBB'";
+        var verifyExpectedResult = [ { col1 : 'BBB', col2 : '456' } ];
+
+        tp.sql(testSql)
+          .returnRowCount()
+          .execute()
+          .then(function(testResult) {
+            expect(testResult).toEqual(testExpectedResult);
+
+            return tp.sql(verifySql)
+              .execute();
+          }).then(function(verifyResult) {
+            expect(verifyResult).toEqual(verifyExpectedResult);
+          }).fail(function(err) {
+            self.fail(err);
+          }).fin(done);
+      });
+
+      it('delete row', function(done) {
+        var testSql = "delete test.transactionsTable where col1 = 'CCC'";
+        var testExpectedResult = 1;
+        var verifySql = "select col1, col2 from test.transactionsTable";
+        var verifyExpectedResult = [
+          { col1 : 'AAA', col2 : 'ZZZ' },
+          { col1 : 'AAA', col2 : 'YYY' },
+          { col1 : 'BBB', col2 : 'XXX' }
+        ];
+
+        tp.sql(testSql)
+          .returnRowCount()
+          .execute()
+          .then(function(testResult) {
+            expect(testResult).toEqual(testExpectedResult);
+
+            return tp.sql(verifySql)
+              .execute();
+          }).then(function(verifyResult) {
+            expect(verifyResult).toEqual(verifyExpectedResult);
+          }).fail(function(err) {
+            self.fail(err);
+          }).fin(done);
+      });
 
       /*jshint +W109 */
     });
