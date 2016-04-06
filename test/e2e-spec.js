@@ -16,6 +16,7 @@ var dbConfig = require('./database/config.json');
 var simpleTable = require('./database/simpleTable.json');
 var typesTable = require('./database/typesTable.json');
 var booleanTable = require('./database/booleanTable.json');
+var transactionsTable = require('./database/transactionsTable.json');
 
 // convert dates in sample data
 for (var i = 0; i < typesTable.data.length; i++) {
@@ -263,10 +264,10 @@ describe('tedious-promises', function () {
 
       /*jshint -W109 */
       it('insert row', function(done) {
-        var testSql = "insert into test.transactionsTable (col1, col2) values('qwerty', '123')";
-        var testExpectedResult = 1;
-        var verifySql = "select col1, col2 from test.transactionsTable where col1 = 'qwerty'";
-        var verifyExpectedResult = [ { col1 : 'qwerty', col2 : '123' } ];
+        var testSql = transactionsTable.groupA.insert;
+        var testExpectedResult = transactionsTable.groupA.rowCount;
+        var verifySql = transactionsTable.groupA.select;
+        var verifyExpectedResult = transactionsTable.groupA.data;
 
         tp.sql(testSql)
           .returnRowCount()
@@ -284,10 +285,10 @@ describe('tedious-promises', function () {
       });
 
       it('update row', function(done) {
-        var testSql = "update test.transactionsTable set col2 = '456' where col1 = 'BBB'";
-        var testExpectedResult = 1;
-        var verifySql = "select col1, col2 from test.transactionsTable where col1 = 'BBB'";
-        var verifyExpectedResult = [ { col1 : 'BBB', col2 : '456' } ];
+        var testSql = transactionsTable.groupB.update;
+        var testExpectedResult = transactionsTable.groupB.rowCount;
+        var verifySql = transactionsTable.groupB.select;
+        var verifyExpectedResult = transactionsTable.groupB.data;
 
         tp.sql(testSql)
           .returnRowCount()
@@ -305,14 +306,10 @@ describe('tedious-promises', function () {
       });
 
       it('delete row', function(done) {
-        var testSql = "delete test.transactionsTable where col1 = 'CCC'";
-        var testExpectedResult = 1;
-        var verifySql = "select col1, col2 from test.transactionsTable";
-        var verifyExpectedResult = [
-          { col1 : 'AAA', col2 : 'ZZZ' },
-          { col1 : 'AAA', col2 : 'YYY' },
-          { col1 : 'BBB', col2 : 'XXX' }
-        ];
+        var testSql = transactionsTable.groupC.delete;
+        var testExpectedResult = transactionsTable.groupC.rowCount;
+        var verifySql = transactionsTable.groupC.select;
+        var verifyExpectedResult = transactionsTable.groupC.data;
 
         tp.sql(testSql)
           .returnRowCount()
