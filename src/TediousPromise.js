@@ -6,18 +6,16 @@ var MockTediousConnection = require('./MockTediousConnection');
 var q = require('q');
 var _ = require('lodash');
 
-
-
 function TediousPromise(mode, option) {
   // TODO: Transaction support - Accept an open transaction on the constructor
-  
-  if(mode === 'pool' && _.isObject(option) && _.isFunction(option.acquire)) {
+
+  if (mode === 'pool' && _.isObject(option) && _.isFunction(option.acquire)) {
     this._connectionPool = option;
 
-  } else if(mode === 'single' && _.isObject(option)) {
+  } else if (mode === 'single' && _.isObject(option)) {
     this._connectionConfig = option;
 
-  } else if(mode === 'mock' && _.isFunction(option)) {
+  } else if (mode === 'mock' && _.isFunction(option)) {
     this._mockDataCallback = option;
 
   } else {
@@ -50,123 +48,123 @@ function enableDebugLogging(connection) {
   // connection.on('end', function() { console.log('END'); });
 }
 
-TediousPromise.prototype.beginTransaction = function() {
+TediousPromise.prototype.beginTransaction = function () {
     return this._createConnection()
-        .then(function(connection) {
+        .then(function (connection) {
             var deferred = q.defer();
             this._connection = connection;
-            connection.beginTransaction(function(err) {
+            connection.beginTransaction(function (err) {
                 this._transaction = true;
                 if (err) {
-                    deferred.reject(err);
+                  deferred.reject(err);
                 } else {
-                    deferred.resolve(this);   
+                  deferred.resolve(this);
                 }
-            }.bind(this));
+              }.bind(this));
             return deferred.promise;
-        }.bind(this));
-};
+          }.bind(this));
+  };
 
-TediousPromise.prototype.commitTransaction = function() {
+TediousPromise.prototype.commitTransaction = function () {
     var deferred = q.defer();
-    this._connection.commitTransaction(function(err) {
+    this._connection.commitTransaction(function (err) {
         if (err) {
-            deferred.reject(err);
+          deferred.reject(err);
         } else {
-            this._transaction = false;
-            this._disposeConnection(this._connection);
-            deferred.resolve();   
+          this._transaction = false;
+          this._disposeConnection(this._connection);
+          deferred.resolve();
         }
-    }.bind(this));
+      }.bind(this));
     return deferred.promise;
-};
+  };
 
-TediousPromise.prototype.saveTransaction = function() {
+TediousPromise.prototype.saveTransaction = function () {
     var deferred = q.defer();
-    this._connection.saveTransaction(function(err) {
+    this._connection.saveTransaction(function (err) {
         if (err) {
-            deferred.reject(err);
+          deferred.reject(err);
         } else {
-            deferred.resolve();   
+          deferred.resolve();
         }
-    }.bind(this));
+      }.bind(this));
     return deferred.promise;
-};
+  };
 
-TediousPromise.prototype.rollbackTransaction = function() {
+TediousPromise.prototype.rollbackTransaction = function () {
     var deferred = q.defer();
-    this._connection.rollbackTransaction(function(err) {
+    this._connection.rollbackTransaction(function (err) {
         if (err) {
-            deferred.reject(err);
+          deferred.reject(err);
         } else {
-            this._transaction = false;
-            this._disposeConnection(this._connection);
-            deferred.resolve();   
+          this._transaction = false;
+          this._disposeConnection(this._connection);
+          deferred.resolve();
         }
-    }.bind(this));
+      }.bind(this));
     return deferred.promise;
-};
+  };
 
-TediousPromise.prototype._createConnection = function() {
+TediousPromise.prototype._createConnection = function () {
   // TODO: Transaction support - if transaction, resolve with transaction's connection
   var deferred = q.defer();
 
-  if(this._connection) { // existing connection found
-     deferred.resolve(this._connection);
+  if (this._connection) { // existing connection found
+    deferred.resolve(this._connection);
   } else {
-    if(this._mode === 'mock') {
-        return q(new MockTediousConnection(this));
+    if (this._mode === 'mock') {
+      return q(new MockTediousConnection(this));
 
-    } else if(this._mode === 'pool') {
-        // get from pool
-        this._connectionPool.acquire(function (err, connection) {
+    } else if (this._mode === 'pool') {
+      // get from pool
+      this._connectionPool.acquire(function (err, connection) {
         try {
-            if (err) {
+          if (err) {
             connection.release();
             deferred.reject(err);
-            } else {
+          } else {
             enableDebugLogging(connection);
             deferred.resolve(connection);
-            }
-        } catch(e) {
-            deferred.reject(e);
+          }
+        } catch (e) {
+          deferred.reject(e);
         }
-        });
+      });
 
     } else if (this._mode === 'single') {
-        // create new connection
-        var connection = new Connection(this._connectionConfig);
+      // create new connection
+      var connection = new Connection(this._connectionConfig);
 
-        connection.on('connect', function(err) {
+      connection.on('connect', function (err) {
         try {
-            if (err) {
+          if (err) {
             connection.close();
             deferred.reject(err);
-            } else {
+          } else {
             enableDebugLogging(connection);
             deferred.resolve(connection);
-            }
-        } catch(e) {
-            deferred.reject(e);
+          }
+        } catch (e) {
+          deferred.reject(e);
         }
-        });
+      });
 
     } else {
-        throw new Error('Create connection not implemented for mode: ' + this._mode + '.');
+      throw new Error('Create connection not implemented for mode: ' + this._mode + '.');
     }
   }
 
   return deferred.promise;
 };
 
-TediousPromise.prototype._disposeConnection = function(connection) {
+TediousPromise.prototype._disposeConnection = function (connection) {
   // TODO: Transaction support - if transaction, do nothing
 
-  if(this._mode === 'mock') {
+  if (this._mode === 'mock') {
     return; // nothing to do for the mock
 
-  } else if(this._mode === 'pool') {
-    if(_.isFunction(connection.release)) {
+  } else if (this._mode === 'pool') {
+    if (_.isFunction(connection.release)) {
       // release from connection pool
       connection.release();
     }
@@ -180,41 +178,41 @@ TediousPromise.prototype._disposeConnection = function(connection) {
 
 };
 
-TediousPromise.prototype._handleOutputParameter = function(parameterName, value, metadata) {
-  if(this._outputParameters.hasOwnProperty(parameterName) && _.isFunction(this._outputParameters[parameterName].callback)) {
+TediousPromise.prototype._handleOutputParameter = function (parameterName, value, metadata) {
+  if (this._outputParameters.hasOwnProperty(parameterName) && _.isFunction(this._outputParameters[parameterName].callback)) {
     this._outputParameters[parameterName].callback(value, metadata);
   }
 };
 
-TediousPromise.prototype._executeRequest = function(connection, fnName) {
+TediousPromise.prototype._executeRequest = function (connection, fnName) {
   var deferred = q.defer();
   var results = [];
 
-  var request = new Request(this._sql, function(error, rowCount) {
+  var request = new Request(this._sql, function (error, rowCount) {
     try {
       if (!this._transaction) {
-          this._disposeConnection(connection);
+        this._disposeConnection(connection);
       } else {
-          this._sql = null;
+        this._sql = null;
       }
-      
+
       if (error) {
         deferred.reject(error);
         return;
       } else {
 
-        if(this._forEachRow || this._returnRowCount) {
+        if (this._forEachRow || this._returnRowCount) {
           deferred.resolve(rowCount);
         } else {
           deferred.resolve(results);
         }
       }
-    } catch(e) {
+    } catch (e) {
       deferred.reject(e);
     }
   }.bind(this));
 
-  request.on('row', function(row) {
+  request.on('row', function (row) {
     try {
       var result = {};
 
@@ -222,9 +220,9 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
         var col = row[i];
         var map = this._columns[col.metadata.colName];
 
-        if(!map) {
+        if (!map) {
           // create default mapping if needed
-          if(_.isFunction(this.defaultColumnRenamer)) {
+          if (_.isFunction(this.defaultColumnRenamer)) {
             map = new TediousPromiseColumn(col.metadata.colName, this.defaultColumnRenamer(col.metadata.colName));
           } else {
             map = new TediousPromiseColumn(col.metadata.colName);
@@ -236,33 +234,33 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
         map._applyMapping(col, result);
       }
 
-      if(this._forEachRow) {
+      if (this._forEachRow) {
         this._forEachRow(result);
       } else {
         results.push(result);
       }
-    } catch(e) {
+    } catch (e) {
       deferred.reject(e);
     }
   }.bind(this));
 
-  request.on('returnValue', function(parameterName, value, metadata) {
-    try{
+  request.on('returnValue', function (parameterName, value, metadata) {
+    try {
       this._handleOutputParameter(parameterName, value, metadata);
-    } catch(e) {
+    } catch (e) {
       deferred.reject(e);
     }
   }.bind(this));
 
-  _.forEach(this._parameters, function(p) {
-    request.addParameter( p.name, p.type, p.value, p.options);
+  _.forEach(this._parameters, function (p) {
+    request.addParameter(p.name, p.type, p.value, p.options);
   });
 
-  _.forEach(this._outputParameters, function(p) {
-    request.addOutputParameter( p.name, p.type, p.value, p.options);
+  _.forEach(this._outputParameters, function (p) {
+    request.addOutputParameter(p.name, p.type, p.value, p.options);
   });
 
-  if(fnName === 'callProcedure') {
+  if (fnName === 'callProcedure') {
     connection.callProcedure(request);
   } else {
     connection.execSql(request);
@@ -271,19 +269,18 @@ TediousPromise.prototype._executeRequest = function(connection, fnName) {
   return deferred.promise;
 };
 
-TediousPromise.prototype.returnRowCount = function() {
+TediousPromise.prototype.returnRowCount = function () {
   this._returnRowCount = true;
   return this;
 };
 
-
-TediousPromise.prototype.sql = function(sql) {
-  if(this._sql) {
+TediousPromise.prototype.sql = function (sql) {
+  if (this._sql) {
     throw new Error('SQL already set.');
   }
 
-  if(typeof sql !== 'string') {
-    throw new Error('SQL must be a string, received '+(typeof sql)+'.');
+  if (typeof sql !== 'string') {
+    throw new Error('SQL must be a string, received ' + (typeof sql) + '.');
   }
 
   this._sql = sql;
@@ -291,20 +288,20 @@ TediousPromise.prototype.sql = function(sql) {
   return this;
 };
 
-TediousPromise.prototype.column = function(name, mapping) {
+TediousPromise.prototype.column = function (name, mapping) {
   var map;
 
-  if(mapping instanceof TediousPromiseColumn) {
+  if (mapping instanceof TediousPromiseColumn) {
     map = mapping;
 
-  } else if(typeof mapping === 'undefined' && _.isFunction(this.defaultColumnRenamer)) {
+  } else if (typeof mapping === 'undefined' && _.isFunction(this.defaultColumnRenamer)) {
     map = new TediousPromiseColumn(name, this.defaultColumnRenamer(name));
 
-  } else if(typeof mapping === 'undefined' || typeof mapping === 'string') {
+  } else if (typeof mapping === 'undefined' || typeof mapping === 'string') {
     map = new TediousPromiseColumn(name, mapping);
 
   } else {
-    throw new Error('Unexpected collumn mapping type: '+ (typeof mapping) +'.');
+    throw new Error('Unexpected collumn mapping type: ' + (typeof mapping) + '.');
   }
 
   this._columns[name] = map;
@@ -312,24 +309,24 @@ TediousPromise.prototype.column = function(name, mapping) {
   return this;
 };
 
-TediousPromise.prototype.parameter = function(name, type, value, options) {
+TediousPromise.prototype.parameter = function (name, type, value, options) {
   this._parameters[name] = {
     name: name,
     type: type,
     value: value,
-    options: options
+    options: options,
   };
   this._lastColumn = null;
   return this;
 };
 
-TediousPromise.prototype.outputParameter = function(name, type, value, options, callback) {
-  if(_.isFunction(value) && typeof options === 'undefined' && typeof callback === 'undefined') {
+TediousPromise.prototype.outputParameter = function (name, type, value, options, callback) {
+  if (_.isFunction(value) && typeof options === 'undefined' && typeof callback === 'undefined') {
     // (name, type, callback)
     this._outputParameters[name] = {
       name: name,
       type: type,
-      callback: value
+      callback: value,
     };
   } else {
     // (name, type, value, options, callback)
@@ -338,7 +335,7 @@ TediousPromise.prototype.outputParameter = function(name, type, value, options, 
       type: type,
       value: value,
       options: options,
-      callback: callback
+      callback: callback,
     };
   }
 
@@ -346,8 +343,8 @@ TediousPromise.prototype.outputParameter = function(name, type, value, options, 
   return this;
 };
 
-TediousPromise.prototype.forEachRow = function(callback) {
-  if(typeof callback !== 'function') {
+TediousPromise.prototype.forEachRow = function (callback) {
+  if (typeof callback !== 'function') {
     throw new Error('Callback must be a function.');
   }
 
@@ -356,29 +353,28 @@ TediousPromise.prototype.forEachRow = function(callback) {
   return this;
 };
 
-TediousPromise.prototype.execute = function() {
+TediousPromise.prototype.execute = function () {
   this._lastColumn = null;
 
   return this._createConnection()
-  .then(function(connection) {
+  .then(function (connection) {
     return this._executeRequest(connection);
   }.bind(this));
 };
 
-TediousPromise.prototype.callProcedure = function() {
+TediousPromise.prototype.callProcedure = function () {
   this._lastColumn = null;
 
   return this._createConnection()
-  .then(function(connection) {
+  .then(function (connection) {
     return this._executeRequest(connection, 'callProcedure');
   }.bind(this));
 };
 
-
 // Passthru to some column functions
 function makePassthruFunction(name) {
-  return function() {
-    if(!this._lastColumn) {
+  return function () {
+    if (!this._lastColumn) {
       throw new Error('This function can only be called after the column function.');
     }
 
@@ -387,16 +383,15 @@ function makePassthruFunction(name) {
   };
 }
 
-for (var i = 0; i < TediousPromiseColumn.prototype._passthruFunctions.length; i++ ) {
+for (var i = 0; i < TediousPromiseColumn.prototype._passthruFunctions.length; i++) {
   var name = TediousPromiseColumn.prototype._passthruFunctions[i];
 
-  if(TediousPromise.prototype[name]) {
-    throw new Error('Duplicate function defined in TediousPromiseColumn.prototype._passthruFunctions: '+name+'.');
+  if (TediousPromise.prototype[name]) {
+    throw new Error('Duplicate function defined in TediousPromiseColumn.prototype._passthruFunctions: ' + name + '.');
   }
 
   TediousPromise.prototype[name] = makePassthruFunction(name);
 }
-
 
 ////////////////////////////////////////
 module.exports = TediousPromise;

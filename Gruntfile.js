@@ -1,10 +1,10 @@
 'use strict';
 var testDatabase = require('./test/database/resetTestDatabase');
 
-
 module.exports = function (grunt) {
   // Show elapsed time at the end
   require('time-grunt')(grunt);
+
   // Load all grunt tasks
   require('load-grunt-tasks')(grunt);
 
@@ -15,11 +15,22 @@ module.exports = function (grunt) {
     jshint: {
       options: {
         jshintrc: '.jshintrc',
-        reporter: require('jshint-stylish')
+        reporter: require('jshint-stylish'),
       },
       all: {
-        src: ['Gruntfile.js', 'src/*.js', 'test/**/*.js']
-      }
+        src: ['Gruntfile.js', 'src/*.js', 'test/**/*.js'],
+      },
+    },
+
+    jscs: {
+      src: ['Gruntfile.js', 'src/*.js', 'test/**/*.js'],
+      options: {
+        config: '.jscsrc',
+        esnext: false, // If you use ES6 http://jscs.info/overview.html#esnext
+        verbose: true, // If you need output with rule names http://jscs.info/overview.html#verbose
+        fix: true, // Autofix code style violations when possible.
+        reporter: 'node_modules/jscs-clang-reporter',
+      },
     },
 
     watch: {
@@ -28,7 +39,7 @@ module.exports = function (grunt) {
         tasks: ['default'],
         options: {
           spawn: true,
-          atBegin: true
+          atBegin: true,
         },
       },
     },
@@ -43,16 +54,16 @@ module.exports = function (grunt) {
             statements: 0,
             branches: 0,
             lines: 0,
-            functions: 0
+            functions: 0,
           },
           reportDir: './build/coverage',
           report: [
-            'lcov'
+            'lcov',
           ],
-          collect: [ // false to disable
-            '*coverage.json'
+          collect: [// false to disable
+            '*coverage.json',
           ],
-          excludes: []
+          excludes: [],
         },
         forceExit: false,
         match: '.',
@@ -65,26 +76,29 @@ module.exports = function (grunt) {
         isVerbose: true,
         junitreport: {
           report: false,
-          savePath : './build/reports/jasmine/',
+          savePath: './build/reports/jasmine/',
           useDotNotation: true,
-          consolidate: true
-        }
+          consolidate: true,
+        },
       },
-      src: 'src/*.js'
-    }
+      src: 'src/*.js',
+    },
 
   });
 
-  grunt.registerTask('resetTestDatabase', function() {
+  grunt.loadNpmTasks('grunt-jscs');
+
+  grunt.registerTask('resetTestDatabase', function () {
     var done = this.async();
     testDatabase.reset()
-    .then(function() {
+    .then(function () {
       done();
     })
-    .fail(function(err) {
+    .fail(function (err) {
       console.log(err);
       done(false);
     });
   });
-  grunt.registerTask('default', ['jshint', 'clean', /*'resetTestDatabase',*/ 'jasmine_node']);
+
+  grunt.registerTask('default', ['jscs', 'jshint', 'clean', /*'resetTestDatabase',*/ 'jasmine_node']);
 };

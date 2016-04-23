@@ -14,11 +14,11 @@ for (var i = 0; i < typesTable.data.length; i++) {
   typesTable.data[i].dates = Date.parse(typesTable.data[i].dates);
 }
 
-describe('columns', function() {
+describe('columns', function () {
   var self;
   var tp;
 
-  beforeEach(function() {
+  beforeEach(function () {
     self = this;
     tp = testCommon.initWithoutPool(self);
   });
@@ -28,9 +28,9 @@ describe('columns', function() {
       .column('col1')
       .column('col2')
       .execute()
-      .then(function(results) {
-        expect(results).toEqual(simpleTable.data.slice(0,1));
-      }).fail(function(err) {
+      .then(function (results) {
+        expect(results).toEqual(simpleTable.data.slice(0, 1));
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -38,9 +38,9 @@ describe('columns', function() {
   it('implicit', function (done) {
     tp.sql(simpleTable.selectRow1)
       .execute()
-      .then(function(results) {
-        expect(results).toEqual(simpleTable.data.slice(0,1));
-      }).fail(function(err) {
+      .then(function (results) {
+        expect(results).toEqual(simpleTable.data.slice(0, 1));
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -48,9 +48,9 @@ describe('columns', function() {
   it('string', function (done) {
     tp.sql(typesTable.selectAllStrings)
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(testCommon.selectColumn(typesTable.data, 'strings'));
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -59,9 +59,9 @@ describe('columns', function() {
     tp.sql(typesTable.selectAllDates)
       .column('dates').asDate()
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(testCommon.selectColumn(typesTable.data, 'dates'));
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -69,9 +69,9 @@ describe('columns', function() {
   it('number', function (done) {
     tp.sql(typesTable.selectAllNumbers)
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(testCommon.selectColumn(typesTable.data, 'numbers'));
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -80,9 +80,9 @@ describe('columns', function() {
     tp.sql(typesTable.selectAll)
       .column('dates').asDate()
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(typesTable.data);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -91,9 +91,9 @@ describe('columns', function() {
     tp.sql(booleanTable.selectAllNumbers)
       .column('numbers').asBoolean()
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(testCommon.selectColumn(booleanTable.data, 'numbers'));
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -102,9 +102,9 @@ describe('columns', function() {
     tp.sql(booleanTable.selectAllStrings)
       .column('strings').asBoolean()
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(testCommon.selectColumn(booleanTable.data, 'strings'));
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -113,60 +113,60 @@ describe('columns', function() {
     tp.sql(booleanTable.selectNulls)
       .column('strings').asBoolean()
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(booleanTable.dataNulls);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
 
-  it('should rename', function(done) {
+  it('should rename', function (done) {
     tp.sql(simpleTable.selectRow1)
       .column('col1', 'firstName')
       .column('col2', 'lastName')
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual([{
           firstName: simpleTable.data[0].col1,
-          lastName: simpleTable.data[0].col2
-        }]);
-      }).fail(function(err) {
+          lastName: simpleTable.data[0].col2,
+        },]);
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
 
-  it('should deep set', function(done) {
+  it('should deep set', function (done) {
     tp.sql(simpleTable.selectRow1)
       .column('col1', 'firstLevel.alpha')
       .column('col2', 'firstLevel.beta.third')
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual([{
           firstLevel: {
             alpha: simpleTable.data[0].col1,
             beta: {
-              third: simpleTable.data[0].col2
-            }
-          }
-        }]);
-      }).fail(function(err) {
+              third: simpleTable.data[0].col2,
+            },
+          },
+        },]);
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
 
   it('custom type converter', function (done) {
-    var expected = typesTable.data.map(function(x) {
+    var expected = typesTable.data.map(function (x) {
       return { strings: x.strings.charAt(0) };
     });
 
     tp.sql(typesTable.selectAllStrings)
-      .column('strings').overrideGetValue(function(column) {
+      .column('strings').overrideGetValue(function (column) {
         return column.value.charAt(0);
       })
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(expected);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });

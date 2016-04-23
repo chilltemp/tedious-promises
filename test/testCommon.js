@@ -15,8 +15,6 @@ module.exports.initWithPool = initWithPool;
 module.exports.initWithoutPool = initWithoutPool;
 module.exports.selectColumn = selectColumn;
 
-
-
 function init(test) {
   console.log('Begin test: ' +
     chalk.magenta(test.suite.getFullName()) + ' ' +
@@ -28,9 +26,9 @@ function initWithPool(test) {
   init(test);
 
   var poolConfig = {
-      min: 4,
-      max: 4,
-      log: true
+    min: 4,
+    max: 4,
+    log: true,
   };
 
   var pool = new ConnectionPool(poolConfig, getDatabaseConfig());
@@ -39,7 +37,7 @@ function initWithPool(test) {
 
   return {
     pool: pool,
-    tp: tp
+    tp: tp,
   };
 }
 
@@ -56,7 +54,7 @@ function getDatabaseConfig() {
 
 // for easy slicing of the data in the table files
 function selectColumn(data, column) {
-  return data.map(function(x) {
+  return data.map(function (x) {
     var val = {};
     val[column] = x[column];
     return val;

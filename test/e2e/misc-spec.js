@@ -5,12 +5,11 @@ var TediousPromises = require('../../src').TediousPromises;
 
 var simpleTable = require('../database/simpleTable.json');
 
-
-describe('misc', function() {
+describe('misc', function () {
   var self;
   var tp;
 
-  beforeEach(function() {
+  beforeEach(function () {
     self = this;
     tp = testCommon.initWithoutPool(self);
   });
@@ -18,9 +17,9 @@ describe('misc', function() {
   it('gather all results', function (done) {
     tp.sql(simpleTable.selectRows1to10)
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         expect(results).toEqual(simpleTable.data);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -30,15 +29,15 @@ describe('misc', function() {
     var expectedRows = 10;
 
     tp.sql(simpleTable.selectRows1to10)
-      .forEachRow(function(row) {
+      .forEachRow(function (row) {
         expect(row).toEqual(simpleTable.data[cnt++]);
       })
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         // result is row count for .forEachRow
         expect(results).toBe(expectedRows);
         expect(cnt).toBe(expectedRows);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -47,9 +46,9 @@ describe('misc', function() {
     tp.sql(simpleTable.selectRowById)
       .parameter('id', TYPES.Int, 6)
       .execute()
-      .then(function(results) {
-        expect(results).toEqual(simpleTable.data.slice(5,6));
-      }).fail(function(err) {
+      .then(function (results) {
+        expect(results).toEqual(simpleTable.data.slice(5, 6));
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
@@ -57,22 +56,22 @@ describe('misc', function() {
   it('with bad sql should fail the promise', function (done) {
     tp.sql('select bad sql')
       .execute()
-      .then(function(results) {
+      .then(function (results) {
         self.fail('should not be called');
-      }).fail(function(err) {
+      }).fail(function (err) {
         expect(err instanceof Error).toEqual(true);
       }).fin(done);
   });
 
-  describe('with bad configuration', function() {
+  describe('with bad configuration', function () {
 
-    it('should require either pool or config', function() {
+    it('should require either pool or config', function () {
       var tp = new TediousPromises();
 
       try {
         tp.sql(simpleTable.selectRow1);
         self.fail('should be unreachable');
-      } catch(e) {
+      } catch (e) {
         expect(e instanceof Error).toEqual(true);
         expect(e.message).toMatch(/config/i);
         expect(e.message).toMatch(/pool/i);

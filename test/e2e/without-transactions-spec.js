@@ -3,22 +3,21 @@ var testCommon = require('../testCommon');
 var testDatabase = require('../database/resetTestDatabase');
 var transactionsTable = require('../database/transactionsTable.json');
 
-
-describe('without transactions', function() {
+describe('without transactions', function () {
   var self;
   var tp;
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     self = this;
     tp = testCommon.initWithoutPool(self);
 
     testDatabase.resetTransactionsTableData()
-      .fail(function(err) {
+      .fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
 
-  it('insert row', function(done) {
+  it('insert row', function (done) {
     var testSql = transactionsTable.groupA.insert;
     var testExpectedResult = transactionsTable.groupA.rowCount;
     var verifySql = transactionsTable.groupA.select;
@@ -27,19 +26,19 @@ describe('without transactions', function() {
     tp.sql(testSql)
       .returnRowCount()
       .execute()
-      .then(function(testResult) {
+      .then(function (testResult) {
         expect(testResult).toEqual(testExpectedResult);
 
         return tp.sql(verifySql)
           .execute();
-      }).then(function(verifyResult) {
+      }).then(function (verifyResult) {
         expect(verifyResult).toEqual(verifyExpectedResult);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
 
-  it('update row', function(done) {
+  it('update row', function (done) {
     var testSql = transactionsTable.groupB.update;
     var testExpectedResult = transactionsTable.groupB.rowCount;
     var verifySql = transactionsTable.groupB.select;
@@ -48,19 +47,19 @@ describe('without transactions', function() {
     tp.sql(testSql)
       .returnRowCount()
       .execute()
-      .then(function(testResult) {
+      .then(function (testResult) {
         expect(testResult).toEqual(testExpectedResult);
 
         return tp.sql(verifySql)
           .execute();
-      }).then(function(verifyResult) {
+      }).then(function (verifyResult) {
         expect(verifyResult).toEqual(verifyExpectedResult);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
 
-  it('delete row', function(done) {
+  it('delete row', function (done) {
     var testSql = transactionsTable.groupC.delete;
     var testExpectedResult = transactionsTable.groupC.rowCount;
     var verifySql = transactionsTable.groupC.select;
@@ -69,14 +68,14 @@ describe('without transactions', function() {
     tp.sql(testSql)
       .returnRowCount()
       .execute()
-      .then(function(testResult) {
+      .then(function (testResult) {
         expect(testResult).toEqual(testExpectedResult);
 
         return tp.sql(verifySql)
           .execute();
-      }).then(function(verifyResult) {
+      }).then(function (verifyResult) {
         expect(verifyResult).toEqual(verifyExpectedResult);
-      }).fail(function(err) {
+      }).fail(function (err) {
         self.fail(err);
       }).fin(done);
   });
