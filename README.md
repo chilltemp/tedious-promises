@@ -1,7 +1,10 @@
 #  [![Dependency Status][daviddm-image]][daviddm-url]
 
-> Wraps Tedious SQL commands with Q promises.
+> Wraps [Tedious](https://github.com/pekim/tedious) SQL commands with Q promises.
 > Uses fluent syntax 
+
+## Whats new?
+* Transaction support (beta)
 
 ## Install
 
@@ -122,6 +125,67 @@ function getData(id) {
 }
 ```
 
+### Handeling each row yourself
+```js
+tp.sql("SELECT * FROM table")
+  .forEachRow(function(row) {
+    // do something with the row
+  })
+  .execute()
+  .then(function(results) {
+    // result is row count 
+  }).fail(function(err) {
+    // do something with the failure
+  });
+```
+
+### Return row count instead of data
+Only usefull for INSERT, UPDATE, and DELETE statements
+```js
+tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
+  .returnRowCount()
+  .execute()
+  .then(function(rowCount) {
+    // done, you have the modified row count
+  }).fail(function(err) {
+    // do something with the failure
+  });
+```
+
+## Transactions
+Transaction support in Tedious has been around for a long time, but it's new to Tedious Promises.  So consider it beta until more tests have been added.
+(Initial implemetation by @akanieski)
+```js
+var trans;
+
+// create the transaction from the a tp instance
+tp.beginTransaction()
+  .then(function(newTransaction) {
+    // remember the transaction, you'll need it later
+    trans = newTransaction;
+
+    // use the transaction like a normal tp instance
+    // ('return' chains the promises)
+    return trans.sql(testSql)
+      .returnRowCount()
+      .execute();
+  })
+  .then(function(testResult) {
+    // this is the result of executing testSql on the transaction
+    // do something with it
+    
+    // you can execute another sql statement using the same syntax as above
+    // i.e. return trans.sql(...
+
+    // when you're done using the transaction, commit it
+    return trans.commitTransaction();
+  })
+  .fail(function(err) {
+    // rollback on failures
+    return trans.rollbackTransaction();
+  })
+```
+
 ## Mocking for unit tests
 Set the global mock function instead of setConnectionConfig or setConnectionPool to intercept all calls to tp.execute()
 ```js
@@ -140,6 +204,30 @@ parameters === {
     type: TYPES.Int,
     value: 123,
     options: null
+  }
+}
+```
+
+## Setup end to end testing
+1. Create a SQL database either in Azure or locally
+ * Sample user setup and permissions are in `test/database/init.sql`
+2. Create `test/database/config.json` based upon the sample below 
+ * Replace all `REQUIRED` fields with your database credentials
+ * This file is git ignored so that it isn't accidently checked in
+3. Run `grunt resetTestDatabase` to create the tables and populate test data
+4. Run `grunt` to run the tests, or `grunt watch` to run the test on every file change
+
+```json
+{
+  "userName": "REQUIRED",
+  "password": "REQUIRED",
+  "server": "REQUIRED",
+  "options": {
+    "database": "REQUIRED",
+    "encrypt": true,
+    "debug": {
+      "packet": false
+    }
   }
 }
 ```

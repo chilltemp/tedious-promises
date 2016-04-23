@@ -1,0 +1,27 @@
+{
+  "groupA": {
+    "insert": "insert into test.transactionsTable (col1, col2) values('qwerty', '123')",
+    "rowCount": 1,
+    "select": "select col1, col2 from test.transactionsTable where col1 = 'qwerty'",
+    "data": [ { "col1" : "qwerty", "col2" : "123" } ]
+  },
+  "groupB": {
+    "update": "update test.transactionsTable set col2 = '456' where col1 = 'BBB'",
+    "rowCount": 1,
+    "select": "select col1, col2 from test.transactionsTable where col1 = 'BBB'",
+    "data": [ { "col1" : "BBB", "col2" : "456" } ]
+  },
+  "groupC": {
+    "delete": "delete test.transactionsTable where col1 = 'CCC'",
+    "rowCount": 1,
+    "select": "select col1, col2 from test.transactionsTable",
+    "data": [
+      { "col1" : "AAA", "col2" : "ZZZ" },
+      { "col1" : "AAA", "col2" : "YYY" },
+      { "col1" : "BBB", "col2" : "XXX" }
+    ]
+  }
+}
+
+
+
