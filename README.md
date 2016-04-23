@@ -1,7 +1,10 @@
 #  [![Dependency Status][daviddm-image]][daviddm-url]
 
-> Wraps Tedious SQL commands with Q promises.
+> Wraps [Tedious](https://github.com/pekim/tedious) SQL commands with Q promises.
 > Uses fluent syntax 
+
+## Whats new?
+* Transaction support (beta)
 
 ## Install
 
@@ -147,6 +150,40 @@ tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
   }).fail(function(err) {
     // do something with the failure
   });
+```
+
+## Transactions
+Transaction support in Tedious has been around for a long time, but it's new to Tedious Promises.  So consider it beta until more tests have been added.
+(Initial implemetation by @akanieski)
+```js
+var trans;
+
+// create the transaction from the a tp instance
+tp.beginTransaction()
+  .then(function(newTransaction) {
+    // remember the transaction, you'll need it later
+    trans = newTransaction;
+
+    // use the transaction like a normal tp instance
+    // ('return' chains the promises)
+    return trans.sql(testSql)
+      .returnRowCount()
+      .execute();
+  })
+  .then(function(testResult) {
+    // this is the result of executing testSql on the transaction
+    // do something with it
+    
+    // you can execute another sql statement using the same syntax as above
+    // i.e. return trans.sql(...
+
+    // when you're done using the transaction, commit it
+    return trans.commitTransaction();
+  })
+  .fail(function(err) {
+    // rollback on failures
+    return trans.rollbackTransaction();
+  })
 ```
 
 ## Mocking for unit tests
