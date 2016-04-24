@@ -2,6 +2,7 @@
 var testCommon = require('../testCommon');
 var testDatabase = require('../database/resetTestDatabase');
 var transactionsTable = require('../database/transactionsTable.json');
+var ResultEnum = require('../../src/constants').ResultEnum;
 
 describe('without transactions', function () {
   var self;
@@ -24,7 +25,7 @@ describe('without transactions', function () {
     var verifyExpectedResult = transactionsTable.groupA.data;
 
     tp.sql(testSql)
-      .returnRowCount()
+      .resultType(ResultEnum.rowCount)
       .execute()
       .then(function (testResult) {
         expect(testResult).toEqual(testExpectedResult);
@@ -45,7 +46,7 @@ describe('without transactions', function () {
     var verifyExpectedResult = transactionsTable.groupB.data;
 
     tp.sql(testSql)
-      .returnRowCount()
+      .resultType(ResultEnum.rowCount)
       .execute()
       .then(function (testResult) {
         expect(testResult).toEqual(testExpectedResult);
@@ -66,7 +67,7 @@ describe('without transactions', function () {
     var verifyExpectedResult = transactionsTable.groupC.data;
 
     tp.sql(testSql)
-      .returnRowCount()
+      .resultType(ResultEnum.rowCount)
       .execute()
       .then(function (testResult) {
         expect(testResult).toEqual(testExpectedResult);

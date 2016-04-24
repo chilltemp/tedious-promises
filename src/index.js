@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports.MockData = require('./MockData');
+module.exports.ResultEnum = require('./constants').ResultEnum;
 module.exports.TediousPromise = require('./TediousPromise');
 module.exports.TediousPromises = require('./TediousPromises');
 module.exports.TediousPromiseColumn = require('./TediousPromiseColumn');
