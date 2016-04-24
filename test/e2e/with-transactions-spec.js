@@ -2,7 +2,6 @@
 var testCommon = require('../testCommon');
 var testDatabase = require('../database/resetTestDatabase');
 var transactionsTable = require('../database/transactionsTable.json');
-var ResultEnum = require('../../src/constants').ResultEnum;
 
 describe('with transactions', function () {
   var self;
@@ -32,7 +31,7 @@ describe('with transactions', function () {
           trans = newTransaction;
 
           return trans.sql(testSql)
-            .resultType(ResultEnum.rowCount)
+            .returnRowCount()
             .execute();
         })
         .then(function (testResult) {
@@ -68,7 +67,7 @@ describe('with transactions', function () {
           trans = newTransaction;
 
           return trans.sql(testSql)
-            .resultType(ResultEnum.rowCount)
+            .returnRowCount()
             .execute();
         })
         .then(function (testResult) {
@@ -105,7 +104,7 @@ describe('with transactions', function () {
           trans = newTransaction;
 
           return trans.sql(testSql)
-            .resultType(ResultEnum.rowCount)
+            .returnRowCount()
             .execute();
         })
         .then(function (testResult) {

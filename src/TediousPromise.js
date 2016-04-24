@@ -1,7 +1,6 @@
 'use strict';
 var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
-var ResultEnum = require('./constants').ResultEnum;
 var TediousPromiseColumn = require('./TediousPromiseColumn');
 var MockTediousConnection = require('./MockTediousConnection');
 var q = require('q');
@@ -29,7 +28,7 @@ function TediousPromise(mode, option) {
   this._parameters = {};
   this._outputParameters = {};
   this._forEachRow = null;
-  this._resultType = ResultEnum.arrayOfObjects;
+  this._returnRowCount = false;
 
   // Should only be set when the last function called created a column
   // Must reset to null on other functions
@@ -202,7 +201,7 @@ TediousPromise.prototype._executeRequest = function (connection, fnName) {
         return;
       } else {
 
-        if (this._resultType === ResultEnum.rowCount) {
+        if (this._forEachRow || this._returnRowCount) {
           deferred.resolve(rowCount);
         } else {
           deferred.resolve(results);
@@ -270,8 +269,8 @@ TediousPromise.prototype._executeRequest = function (connection, fnName) {
   return deferred.promise;
 };
 
-TediousPromise.prototype.resultType = function (resultEnum) {
-  this._resultType = resultEnum;
+TediousPromise.prototype.returnRowCount = function () {
+  this._returnRowCount = true;
   return this;
 };
 
@@ -350,7 +349,6 @@ TediousPromise.prototype.forEachRow = function (callback) {
   }
 
   this._forEachRow = callback;
-  this._resultType = ResultEnum.rowCount;
   this._lastColumn = null;
   return this;
 };

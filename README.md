@@ -143,7 +143,7 @@ tp.sql("SELECT * FROM table")
 Only usefull for INSERT, UPDATE, and DELETE statements
 ```js
 tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
-  .resultType(ResultEnum.rowCount)
+  .returnRowCount()
   .execute()
   .then(function(rowCount) {
     // done, you have the modified row count
