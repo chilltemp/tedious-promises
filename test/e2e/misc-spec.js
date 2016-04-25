@@ -14,34 +14,6 @@ describe('misc', function () {
     tp = testCommon.initWithoutPool(self);
   });
 
-  it('gather all results', function (done) {
-    tp.sql(simpleTable.selectRows1to10)
-      .execute()
-      .then(function (results) {
-        expect(results).toEqual(simpleTable.data);
-      }).fail(function (err) {
-        self.fail(err);
-      }).fin(done);
-  });
-
-  it('for each row', function (done) {
-    var cnt = 0;
-    var expectedRows = 10;
-
-    tp.sql(simpleTable.selectRows1to10)
-      .forEachRow(function (row) {
-        expect(row).toEqual(simpleTable.data[cnt++]);
-      })
-      .execute()
-      .then(function (results) {
-        // result is row count for .forEachRow
-        expect(results).toBe(expectedRows);
-        expect(cnt).toBe(expectedRows);
-      }).fail(function (err) {
-        self.fail(err);
-      }).fin(done);
-  });
-
   it('with a parameter', function (done) {
     tp.sql(simpleTable.selectRowById)
       .parameter('id', TYPES.Int, 6)

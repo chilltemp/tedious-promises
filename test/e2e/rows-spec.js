@@ -74,6 +74,38 @@ describe('row transformations', function () {
     });
   });
 
+  describe('rowToArray', function () {
+    it('gather all results', function (done) {
+      tp.sql(simpleTable.selectRows1to10)
+        .rowTransformer('rowToArray')
+        .execute()
+        .then(function (results) {
+          expect(results).toEqual(simpleTable.dataArrays);
+        }).fail(function (err) {
+          self.fail(err);
+        }).fin(done);
+    });
+
+    it('for each row', function (done) {
+      var cnt = 0;
+      var expectedRows = 10;
+
+      tp.sql(simpleTable.selectRows1to10)
+        .rowTransformer('rowToArray')
+        .forEachRow(function (row) {
+          expect(row).toEqual(simpleTable.dataArrays[cnt++]);
+        })
+        .execute()
+        .then(function (results) {
+          // result is row count for .forEachRow
+          expect(results).toBe(expectedRows);
+          expect(cnt).toBe(expectedRows);
+        }).fail(function (err) {
+          self.fail(err);
+        }).fin(done);
+    });
+  });
+
   describe('custom transformer function', function () {
 
     function customTransformer(row, getColumnMap) {

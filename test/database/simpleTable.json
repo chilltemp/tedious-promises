@@ -25,5 +25,17 @@
     [ "col1", "Baxter", "col2", "Nerea" ],
     [ "col1", "Arthur", "col2", "September" ],
     [ "col1", "Cruz", "col2", "Sacha" ]
+  ],
+  "dataArrays": [
+    [ "Fulton", "Kylie" ],
+    [ "Maxwell", "Sonya" ],
+    [ "Macon", "Kendall" ],
+    [ "Hector", "Rowan" ],
+    [ "Driscoll", "Adrienne" ],
+    [ "Vaughan", "Cailin" ],
+    [ "Ivan", "Fallon" ],
+    [ "Baxter", "Nerea" ],
+    [ "Arthur", "September" ],
+    [ "Cruz", "Sacha" ]
   ]
 }

@@ -164,6 +164,14 @@ tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
 }]
 ```
 
+* 'rowToArray' converts each row into an array of values
+```js
+[
+  ['row 1 col 1', 'row 1 col 2'], 
+  ['row 2 col 1', 'row 2 col 2']
+]
+```
+
 * You can also pass in a function to do your own row transformation.
 ```js
 function customTransformer(row, getColumnMap) {

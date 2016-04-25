@@ -216,6 +216,19 @@ TediousPromise.prototype.transformers = {
 
     return result;
   },
+
+  rowToArray: function (row, getColumnMap) {
+    var result = [];
+
+    for (var i = 0; i < row.length; i++) {
+      var col = row[i];
+      var map = getColumnMap(col.metadata.colName);
+
+      result.push(map.GetColumnValue(col));
+    }
+
+    return result;
+  },
 };
 
 TediousPromise.prototype._executeRequest = function (connection, fnName) {
