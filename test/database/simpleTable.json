@@ -13,5 +13,17 @@
     { "col1": "Baxter", "col2": "Nerea" },
     { "col1": "Arthur", "col2": "September" },
     { "col1": "Cruz", "col2": "Sacha" }
+  ],
+  "dataCustomTransformer": [
+    [ "col1", "Fulton", "col2", "Kylie" ],
+    [ "col1", "Maxwell", "col2", "Sonya" ],
+    [ "col1", "Macon", "col2", "Kendall" ],
+    [ "col1", "Hector", "col2", "Rowan" ],
+    [ "col1", "Driscoll", "col2", "Adrienne" ],
+    [ "col1", "Vaughan", "col2", "Cailin" ],
+    [ "col1", "Ivan", "col2", "Fallon" ],
+    [ "col1", "Baxter", "col2", "Nerea" ],
+    [ "col1", "Arthur", "col2", "September" ],
+    [ "col1", "Cruz", "col2", "Sacha" ]
   ]
 }

@@ -29,6 +29,7 @@ function TediousPromise(mode, option) {
   this._outputParameters = {};
   this._forEachRow = null;
   this._returnRowCount = false;
+  this._transformRow = this.transformers.rowToObject;
 
   // Should only be set when the last function called created a column
   // Must reset to null on other functions
@@ -184,6 +185,39 @@ TediousPromise.prototype._handleOutputParameter = function (parameterName, value
   }
 };
 
+TediousPromise.prototype._getColumnMap = function (colName) {
+  var map = this._columns[colName];
+
+  if (!map) {
+
+    // create default mapping if needed
+    if (_.isFunction(this.defaultColumnRenamer)) {
+      map = new TediousPromiseColumn(colName, this.defaultColumnRenamer(colName));
+    } else {
+      map = new TediousPromiseColumn(colName);
+    }
+
+    this._columns[colName] = map;
+  }
+
+  return map;
+};
+
+TediousPromise.prototype.transformers = {
+  rowToObject: function (row, getColumnMap) {
+    var result = {};
+
+    for (var i = 0; i < row.length; i++) {
+      var col = row[i];
+      var map = getColumnMap(col.metadata.colName);
+
+      map._applyMapping(col, result);
+    }
+
+    return result;
+  },
+};
+
 TediousPromise.prototype._executeRequest = function (connection, fnName) {
   var deferred = q.defer();
   var results = [];
@@ -214,25 +248,8 @@ TediousPromise.prototype._executeRequest = function (connection, fnName) {
 
   request.on('row', function (row) {
     try {
-      var result = {};
-
-      for (var i = 0; i < row.length; i++) {
-        var col = row[i];
-        var map = this._columns[col.metadata.colName];
-
-        if (!map) {
-          // create default mapping if needed
-          if (_.isFunction(this.defaultColumnRenamer)) {
-            map = new TediousPromiseColumn(col.metadata.colName, this.defaultColumnRenamer(col.metadata.colName));
-          } else {
-            map = new TediousPromiseColumn(col.metadata.colName);
-          }
-
-          this._columns[col.metadata.colName] = map;
-        }
-
-        map._applyMapping(col, result);
-      }
+      // need to re-bind getColumnMap, since it's passed as a parameter
+      var result = this._transformRow(row, this._getColumnMap.bind(this));
 
       if (this._forEachRow) {
         this._forEachRow(result);
@@ -269,8 +286,26 @@ TediousPromise.prototype._executeRequest = function (connection, fnName) {
   return deferred.promise;
 };
 
+TediousPromise.prototype.rowTransformer = function (transformer) {
+  if (_.isFunction(transformer)) {
+    this._transformRow = transformer;
+  } else if (_.isString(transformer)) {
+    this._transformRow = this.transformers[transformer];
+
+    if (!this._transformRow) {
+      throw new Error('Row transformer "' + transformer + '" not defined.');
+    }
+  } else {
+    throw new Error('Thr row transformer must either be a function or a string.');
+  }
+
+  this._lastColumn = null;
+  return this;
+};
+
 TediousPromise.prototype.returnRowCount = function () {
   this._returnRowCount = true;
+  this._lastColumn = null;
   return this;
 };
 

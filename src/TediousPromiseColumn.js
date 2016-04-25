@@ -20,7 +20,7 @@ TediousPromiseColumn.prototype.overrideGetValue = function (getFunction) {
     throw new Error('Argument must be a function.');
   }
 
-  this._getColumnValue = getFunction;
+  this.GetColumnValue = getFunction;
   return this;
 };
 
@@ -33,12 +33,12 @@ TediousPromiseColumn.prototype.overrideApplyMapping = function (applyFunction) {
   return this;
 };
 
-TediousPromiseColumn.prototype._getColumnValue = function (column) {
+TediousPromiseColumn.prototype.GetColumnValue = function (column) {
   return column.value;
 };
 
 TediousPromiseColumn.prototype._applyMapping = function (column, result) {
-  var value = this._getColumnValue(column);
+  var value = this.GetColumnValue(column);
 
   if (this._path)  {
     _.deepSet(result, this._path, value);

@@ -10,6 +10,9 @@ var ConnectionPool = require('tedious-connection-pool');
 // This will give failing unit tests better stack traces if they use promises
 q.longStackSupport = true;
 
+// Compensate for internet latency
+jasmine.getEnv().defaultTimeoutInterval = 20000;
+
 module.exports.getDatabaseConfig = getDatabaseConfig;
 module.exports.initWithPool = initWithPool;
 module.exports.initWithoutPool = initWithoutPool;

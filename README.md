@@ -152,6 +152,41 @@ tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
   });
 ```
 
+### Row transformers
+* 'rowToObject' (default) converts each row into an object where the column names become the keys
+```js
+[{
+  col1: 'row 1 col 1',
+  col2: 'row 1 col 2'
+}, {
+  col1: 'row 2 col 1',
+  col2: 'row 2 col 2'
+}]
+```
+
+* You can also pass in a function to do your own row transformation.
+```js
+function customTransformer(row, getColumnMap) {
+  result = []; // Or {}, or anything you'd like
+
+  for (var i = 0; i < row.length; i++) {
+    var col = row[i];
+    var name = col.metadata.colName;
+    
+    // The getColumnMap function returns the built in column mappings.  
+    // The GetColumnValue function returns the columns value after being 
+    // processed by transformers like asBoolean() and asDate().
+    // See TediousPromiseColumn.js for other column functions.
+    var map = this.GetColumnMap(name);
+    var value = map.GetColumnValue(col)
+    
+    // do something with the column name and value
+  }
+
+  return result;
+}
+```
+
 ## Transactions
 Transaction support in Tedious has been around for a long time, but it's new to Tedious Promises.  So consider it beta until more tests have been added.
 (Initial implemetation by @akanieski)
