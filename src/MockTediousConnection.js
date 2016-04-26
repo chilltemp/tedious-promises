@@ -25,6 +25,7 @@ MockTediousConnection.prototype.execSql = function (request) {
       // do nothing
 
     } else if (_.isArray(data)) {
+      var row = [];
 
       var makeColumn = function (value, key) {
         row.push({
@@ -36,7 +37,6 @@ MockTediousConnection.prototype.execSql = function (request) {
       };
 
       for (var i = 0; i < data.length; i++) {
-        var row = [];
         _.forIn(data[i], makeColumn);
 
         // Warning: _events is a private object of a tedious Request, may change
