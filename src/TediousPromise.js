@@ -3,7 +3,7 @@ var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
 var TediousPromiseColumn = require('./TediousPromiseColumn');
 var MockTediousConnection = require('./MockTediousConnection');
-var q = require('q');
+var PromiseUtil = require('./PromiseUtil');
 var _ = require('lodash');
 
 function TediousPromise(mode, option) {
@@ -30,6 +30,7 @@ function TediousPromise(mode, option) {
   this._forEachRow = null;
   this._returnRowCount = false;
   this._transformRow = this.transformers.rowToObject;
+  this._promiseLibrary = PromiseUtil.getNamedLibrary('q');
 
   // Should only be set when the last function called created a column
   // Must reset to null on other functions
@@ -49,10 +50,16 @@ function enableDebugLogging(connection) {
   // connection.on('end', function() { console.log('END'); });
 }
 
+TediousPromise.prototype.setPromiseLibrary = function (libraryOrName) {
+  // TediousPromises class will bypass this function and set _promiseLibrary directly
+  //   so we don't need to repeatedly re-validate the library.
+  this._promiseLibrary = PromiseUtil.getOrValidateLibrary(libraryOrName);
+};
+
 TediousPromise.prototype.beginTransaction = function () {
     return this._createConnection()
         .then(function (connection) {
-            var deferred = q.defer();
+            var deferred = this._promiseLibrary.defer();
             this._connection = connection;
             connection.beginTransaction(function (err) {
                 this._transaction = true;
@@ -67,7 +74,7 @@ TediousPromise.prototype.beginTransaction = function () {
   };
 
 TediousPromise.prototype.commitTransaction = function () {
-    var deferred = q.defer();
+    var deferred = this._promiseLibrary.defer();
     this._connection.commitTransaction(function (err) {
         if (err) {
           deferred.reject(err);
@@ -81,7 +88,7 @@ TediousPromise.prototype.commitTransaction = function () {
   };
 
 TediousPromise.prototype.saveTransaction = function () {
-    var deferred = q.defer();
+    var deferred = this._promiseLibrary.defer();
     this._connection.saveTransaction(function (err) {
         if (err) {
           deferred.reject(err);
@@ -93,7 +100,7 @@ TediousPromise.prototype.saveTransaction = function () {
   };
 
 TediousPromise.prototype.rollbackTransaction = function () {
-    var deferred = q.defer();
+    var deferred = this._promiseLibrary.defer();
     this._connection.rollbackTransaction(function (err) {
         if (err) {
           deferred.reject(err);
@@ -108,13 +115,13 @@ TediousPromise.prototype.rollbackTransaction = function () {
 
 TediousPromise.prototype._createConnection = function () {
   // TODO: Transaction support - if transaction, resolve with transaction's connection
-  var deferred = q.defer();
+  var deferred = this._promiseLibrary.defer();
 
   if (this._connection) { // existing connection found
     deferred.resolve(this._connection);
   } else {
     if (this._mode === 'mock') {
-      return q(new MockTediousConnection(this));
+      return this._promiseLibrary.resolve(new MockTediousConnection(this));
 
     } else if (this._mode === 'pool') {
       // get from pool
@@ -232,7 +239,7 @@ TediousPromise.prototype.transformers = {
 };
 
 TediousPromise.prototype._executeRequest = function (connection, fnName) {
-  var deferred = q.defer();
+  var deferred = this._promiseLibrary.defer();
   var results = [];
 
   var request = new Request(this._sql, function (error, rowCount) {

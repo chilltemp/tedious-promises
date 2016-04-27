@@ -1,10 +1,12 @@
 'use strict';
 var TediousPromise = require('./TediousPromise');
+var PromiseUtil = require('./PromiseUtil');
 var _ = require('lodash');
 
 function TediousPromises() {
   this._mode = null;
   this._option = null;
+  this._promiseLibrary = null;
 }
 
 TediousPromises.prototype.setConnectionPool = function (connectionPool) {
@@ -33,6 +35,10 @@ TediousPromises.prototype.setConnectionConfig = function (connectionConfig) {
   this._mode = 'single';
   this._option = connectionConfig;
   return this;
+};
+
+TediousPromises.prototype.setPromiseLibrary = function (libraryOrName) {
+  this._promiseLibrary = PromiseUtil.getOrValidateLibrary(libraryOrName);
 };
 
 // A mock function to be called instead of an actual database call.
@@ -68,6 +74,10 @@ TediousPromises.prototype.sql = function (sql) {
 
   if (_.isFunction(this._renameFunction)) {
     tp.defaultColumnRenamer = this._renameFunction;
+  }
+
+  if (_.isFunction(this._promiseLibrary)) {
+    tp._promiseLibrary = this._promiseLibrary;
   }
 
   return tp.sql(sql);
