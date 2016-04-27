@@ -129,7 +129,7 @@ describe('columns', function () {
         expect(results).toEqual([{
           firstName: simpleTable.data[0].col1,
           lastName: simpleTable.data[0].col2,
-        }, ]);
+        }]);
       }).fail(function (err) {
         self.fail(err);
       }).fin(done);
@@ -148,7 +148,7 @@ describe('columns', function () {
               third: simpleTable.data[0].col2,
             },
           },
-        }, ]);
+        }]);
       }).fail(function (err) {
         self.fail(err);
       }).fin(done);
