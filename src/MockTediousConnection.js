@@ -5,7 +5,28 @@ var _ = require('lodash');
 
 function MockTediousConnection(tediousPromise) {
   this._tediousPormise = tediousPromise;
+  this.lastTransactionAction = 'none';
 }
+
+MockTediousConnection.prototype.beginTransaction = function (callback) {
+  this.lastTransactionAction = 'begin';
+  callback();
+};
+
+MockTediousConnection.prototype.saveTransaction = function (callback) {
+  this.lastTransactionAction = 'save';
+  callback();
+};
+
+MockTediousConnection.prototype.commitTransaction = function (callback) {
+  this.lastTransactionAction = 'commit';
+  callback();
+};
+
+MockTediousConnection.prototype.rollbackTransaction = function (callback) {
+  this.lastTransactionAction = 'rollback';
+  callback();
+};
 
 MockTediousConnection.prototype.execSql = function (request) {
   // raise row.on('row', callback) for each row of the mock data
