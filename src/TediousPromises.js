@@ -65,21 +65,26 @@ TediousPromises.prototype.setDefaultColumnRenamer = function (renameFunction) {
   return this;
 };
 
-TediousPromises.prototype.sql = function (sql) {
-  if (!this._mode || !this._option) {
-    throw new Error('Must set the Connection Pool, Connection Config, or Mock Callback first.');
-  }
-
+TediousPromises.prototype._createTediousPromise = function () {
   var tp = new TediousPromise(this._mode, this._option);
 
   if (_.isFunction(this._renameFunction)) {
     tp.defaultColumnRenamer = this._renameFunction;
   }
 
-  if (_.isFunction(this._promiseLibrary)) {
+  if (this._promiseLibrary) {
     tp._promiseLibrary = this._promiseLibrary;
   }
 
+  return tp;
+};
+
+TediousPromises.prototype.sql = function (sql) {
+  if (!this._mode || !this._option) {
+    throw new Error('Must set the Connection Pool, Connection Config, or Mock Callback first.');
+  }
+
+  var tp = this._createTediousPromise();
   return tp.sql(sql);
 };
 
@@ -88,12 +93,7 @@ TediousPromises.prototype.beginTransaction = function () {
     throw new Error('Must set the Connection Pool, Connection Config, or Mock Callback first.');
   }
 
-  var tp = new TediousPromise(this._mode, this._option);
-
-  if (_.isFunction(this._renameFunction)) {
-    tp.defaultColumnRenamer = this._renameFunction;
-  }
-
+  var tp = this._createTediousPromise();
   return tp.beginTransaction();
 };
 
@@ -102,12 +102,7 @@ TediousPromises.prototype.rollbackTransaction = function () {
     throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
   }
 
-  var tp = new TediousPromise(this._mode, this._option);
-
-  if (_.isFunction(this._renameFunction)) {
-    tp.defaultColumnRenamer = this._renameFunction;
-  }
-
+  var tp = this._createTediousPromise();
   return tp.rollbackTransaction();
 };
 
@@ -116,12 +111,7 @@ TediousPromises.prototype.saveTransaction = function () {
     throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
   }
 
-  var tp = new TediousPromise(this._mode, this._option);
-
-  if (_.isFunction(this._renameFunction)) {
-    tp.defaultColumnRenamer = this._renameFunction;
-  }
-
+  var tp = this._createTediousPromise();
   return tp.saveTransaction();
 };
 
@@ -130,12 +120,7 @@ TediousPromises.prototype.commitTransaction = function () {
     throw new Error('Must set the Ponnection Pool, Connection Config, or Mock Callback first.');
   }
 
-  var tp = new TediousPromise(this._mode, this._option);
-
-  if (_.isFunction(this._renameFunction)) {
-    tp.defaultColumnRenamer = this._renameFunction;
-  }
-
+  var tp = this._createTediousPromise();
   return tp.commitTransaction();
 };
 
