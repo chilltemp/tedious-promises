@@ -14,6 +14,7 @@ q.longStackSupport = true;
 jasmine.getEnv().defaultTimeoutInterval = 20000;
 
 module.exports.getDatabaseConfig = getDatabaseConfig;
+module.exports.init = init;
 module.exports.initWithPool = initWithPool;
 module.exports.initWithoutPool = initWithoutPool;
 module.exports.selectColumn = selectColumn;

@@ -1,10 +1,12 @@
 #  [![Dependency Status][daviddm-image]][daviddm-url]
 
-> Wraps [Tedious](https://github.com/pekim/tedious) SQL commands with Q promises.
+> Wraps [Tedious](https://github.com/pekim/tedious) SQL commands with `Q` or `es6` promises.
 > Uses fluent syntax 
 
 ## Whats new?
 * Transaction support (beta)
+* Alternate return data formats (see Row Transformers)
+* Should support any promise library
 
 ## Install
 
@@ -193,6 +195,24 @@ function customTransformer(row, getColumnMap) {
 
   return result;
 }
+```
+
+## Promises
+The `execute` function returns a promise (as do the transaction functions).  
+By default this is a [Q](https://github.com/kriskowal/q) promise.
+es6 promises are also supported out of the box, but you should be able to 
+use any promise library by writing a small polyfill.
+
+### es6 Promises
+```js
+// Set when you initialize TP to make it global
+tp.setConnectionPool(poolConfig);
+tp.setPromiseLibrary('es6');
+
+// You can also set the promise library on specific sql commands
+return tp.sql('SELECT something FROM something')
+  .setPromiseLibrary('es6')
+  .execute();
 ```
 
 ## Transactions

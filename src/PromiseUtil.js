@@ -5,22 +5,26 @@ var _ = require('lodash');
 var namedLibraries = {
   q: q,
   es6: {
-    defer: es6Defer,
-    resolve: Promise.resolve,
-    reject: Promise.reject,
+    defer: function () {
+      var deferred = {};
+
+      deferred.promise = new Promise(function (resolve, reject) {
+        deferred.resolve = resolve;
+        deferred.reject = reject;
+      });
+
+      return deferred;
+    },
+
+    resolve: function (value) {
+      return Promise.resolve(value);
+    },
+
+    reject: function (value) {
+      return Promise.reject(value);
+    },
   },
 };
-
-function es6Defer() {
-  var deferred = {};
-
-  deferred.promise = new Promise(function (resolve, reject) {
-    deferred.resolve = resolve;
-    deferred.reject = reject;
-  });
-
-  return deferred;
-}
 
 function getNamedLibrary(name) {
   if (!namedLibraries.hasOwnProperty(name)) {
@@ -37,21 +41,21 @@ function validateLibrary(library) {
   }
 
   if (!_.isFunction(library.defer)) {
-    throw new Error('Promise library must have a static "defer" function.');
+    throw new Error('Promise library must have a "defer" function.');
   }
 
   if (!_.isFunction(library.reject)) {
-    throw new Error('Promise library must have a static "reject" function.');
+    throw new Error('Promise library must have a "reject" function.');
   }
 
   if (!_.isFunction(library.resolve)) {
-    throw new Error('Promise library must have a static "resolve" function.');
+    throw new Error('Promise library must have a "resolve" function.');
   }
 
   var deferred = library.defer();
 
   if (!_.isFunction(deferred.reject)) {
-    throw new Error('Promise library\'s deferred object must have a static "reject" function.');
+    throw new Error('Promise library\'s deferred object must have a "reject" function.');
   }
 
   if (!_.isFunction(deferred.resolve)) {
