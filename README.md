@@ -1,10 +1,12 @@
 #  [![Dependency Status][daviddm-image]][daviddm-url]
 
-> Wraps [Tedious](https://github.com/pekim/tedious) SQL commands with Q promises.
+> Wraps [Tedious](https://github.com/pekim/tedious) SQL commands with `Q` or `es6` promises.
 > Uses fluent syntax 
 
 ## Whats new?
 * Transaction support (beta)
+* Alternate return data formats (see Row Transformers)
+* Should support any promise library
 
 ## Install
 
@@ -150,6 +152,67 @@ tp.sql("insert into table (col1, col2) values('qwerty', '123')" )
   }).fail(function(err) {
     // do something with the failure
   });
+```
+
+### Row transformers
+* 'rowToObject' (default) converts each row into an object where the column names become the keys
+```js
+[{
+  col1: 'row 1 col 1',
+  col2: 'row 1 col 2'
+}, {
+  col1: 'row 2 col 1',
+  col2: 'row 2 col 2'
+}]
+```
+
+* 'rowToArray' converts each row into an array of values
+```js
+[
+  ['row 1 col 1', 'row 1 col 2'], 
+  ['row 2 col 1', 'row 2 col 2']
+]
+```
+
+* You can also pass in a function to do your own row transformation.
+```js
+function customTransformer(row, getColumnMap) {
+  result = []; // Or {}, or anything you'd like
+
+  for (var i = 0; i < row.length; i++) {
+    var col = row[i];
+    var name = col.metadata.colName;
+    
+    // The getColumnMap function returns the built in column mappings.  
+    // The GetColumnValue function returns the columns value after being 
+    // processed by transformers like asBoolean() and asDate().
+    // See TediousPromiseColumn.js for other column functions.
+    var map = this.GetColumnMap(name);
+    var value = map.GetColumnValue(col)
+    
+    // do something with the column name and value
+  }
+
+  return result;
+}
+```
+
+## Promises
+The `execute` function returns a promise (as do the transaction functions).  
+By default this is a [Q](https://github.com/kriskowal/q) promise.
+es6 promises are also supported out of the box, but you should be able to 
+use any promise library by writing a small polyfill.
+
+### es6 Promises
+```js
+// Set when you initialize TP to make it global
+tp.setConnectionPool(poolConfig);
+tp.setPromiseLibrary('es6');
+
+// You can also set the promise library on specific sql commands
+return tp.sql('SELECT something FROM something')
+  .setPromiseLibrary('es6')
+  .execute();
 ```
 
 ## Transactions

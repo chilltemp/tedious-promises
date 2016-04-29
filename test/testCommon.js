@@ -10,12 +10,14 @@ var ConnectionPool = require('tedious-connection-pool');
 // This will give failing unit tests better stack traces if they use promises
 q.longStackSupport = true;
 
+// Compensate for internet latency
+jasmine.getEnv().defaultTimeoutInterval = 20000;
+
 module.exports.getDatabaseConfig = getDatabaseConfig;
+module.exports.init = init;
 module.exports.initWithPool = initWithPool;
 module.exports.initWithoutPool = initWithoutPool;
 module.exports.selectColumn = selectColumn;
-
-
 
 function init(test) {
   console.log('Begin test: ' +
@@ -28,9 +30,9 @@ function initWithPool(test) {
   init(test);
 
   var poolConfig = {
-      min: 4,
-      max: 4,
-      log: true
+    min: 4,
+    max: 4,
+    log: true,
   };
 
   var pool = new ConnectionPool(poolConfig, getDatabaseConfig());
@@ -39,7 +41,7 @@ function initWithPool(test) {
 
   return {
     pool: pool,
-    tp: tp
+    tp: tp,
   };
 }
 
@@ -56,7 +58,7 @@ function getDatabaseConfig() {
 
 // for easy slicing of the data in the table files
 function selectColumn(data, column) {
-  return data.map(function(x) {
+  return data.map(function (x) {
     var val = {};
     val[column] = x[column];
     return val;

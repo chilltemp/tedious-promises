@@ -1,0 +1,10 @@
+{
+  "preset": "airbnb",
+  "safeContextKeyword": ["self"],
+  "maximumLineLength": 130,
+  "requirePaddingNewLinesBeforeLineComments": false,
+  "requireTrailingComma": {
+    "ignoreSingleValue": true,
+    "ignoreSingleLine": true
+  }
+}
