@@ -216,7 +216,7 @@ return tp.sql('SELECT something FROM something')
 ```
 
 ## Transactions
-Transaction support in Tedious has been around for a long time, but it's new to Tedious Promises.  So consider it beta until more tests have been added.
+Transaction support in Tedious has been around for a long time, but it's new to Tedious Promises.  **So consider it beta for now.  It is possible that there will be breaking changes in the future.**
 (Initial implemetation by @akanieski)
 ```js
 var trans;
