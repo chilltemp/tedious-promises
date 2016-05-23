@@ -128,7 +128,10 @@ TediousPromise.prototype._createConnection = function () {
       this._connectionPool.acquire(function (err, connection) {
         try {
           if (err) {
-            connection.release();
+            if (connection) {
+              connection.release();
+            }
+
             deferred.reject(err);
           } else {
             enableDebugLogging(connection);
