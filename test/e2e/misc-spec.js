@@ -14,6 +14,36 @@ describe('misc', function () {
     tp = testCommon.initWithoutPool(self);
   });
 
+  it('insert returning identity', function (done) {
+    tp.sql(simpleTable.insertReturningIdentity)
+      .execute()
+      .then(function (results) {
+        console.log('****', results);
+        expect(results).toEqual(jasmine.any(Array));
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual(jasmine.any(Object));
+        expect(results[0]['']).toEqual(jasmine.any(Number));
+        expect(results[0]['']).toBeGreaterThan(simpleTable.data.length);
+      }).fail(function (err) {
+        self.fail(err);
+      }).fin(done);
+  });
+
+  it('insert returning identity as', function (done) {
+    tp.sql(simpleTable.insertReturningIdentityAs)
+      .execute()
+      .then(function (results) {
+        console.log('****', results);
+        expect(results).toEqual(jasmine.any(Array));
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual(jasmine.any(Object));
+        expect(results[0].id).toEqual(jasmine.any(Number));
+        expect(results[0].id).toBeGreaterThan(simpleTable.data.length);
+      }).fail(function (err) {
+        self.fail(err);
+      }).fin(done);
+  });
+
   it('with a parameter', function (done) {
     tp.sql(simpleTable.selectRowById)
       .parameter('id', TYPES.Int, 6)

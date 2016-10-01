@@ -2,6 +2,8 @@
   "selectRow1": "SELECT col1, col2 FROM test.simpleTable WHERE simpleTableID = 1",
   "selectRows1to10": "SELECT col1, col2 FROM test.simpleTable WHERE simpleTableID between 1 and 10",
   "selectRowById": "SELECT col1, col2 FROM test.simpleTable WHERE simpleTableID = @id",
+  "insertReturningIdentity": "INSERT INTO test.simpleTable (col1, col2) VALUES ('Cruz','Rowan'); SELECT @@identity",
+  "insertReturningIdentityAs": "INSERT INTO test.simpleTable (col1, col2) VALUES ('Cruz','Rowan'); SELECT @@identity as id",
   "data": [
     { "col1": "Fulton", "col2": "Kylie" },
     { "col1": "Maxwell", "col2": "Sonya" },

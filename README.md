@@ -127,6 +127,16 @@ function getData(id) {
 }
 ```
 
+### Returning the generated key from an identity column
+(Technically, you don't need to use 'as id', but it makes the code easier to read.)
+```js
+tp.sql("INSERT INTO table (col1, col2) VALUES ('x','y'); SELECT @@identity as id")
+  .execute()
+  .then(function(results) {
+    console.log(results[0].id);
+  });
+```
+
 ### Handeling each row yourself
 ```js
 tp.sql("SELECT * FROM table")
