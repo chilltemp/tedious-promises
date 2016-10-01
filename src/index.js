@@ -16,3 +16,4 @@ module.exports.setConnectionPool = defaultInstance.setConnectionPool.bind(defaul
 module.exports.setConnectionConfig = defaultInstance.setConnectionConfig.bind(defaultInstance);
 module.exports.setMockDataCallback = defaultInstance.setMockDataCallback.bind(defaultInstance);
 module.exports.setDefaultColumnRenamer = defaultInstance.setDefaultColumnRenamer.bind(defaultInstance);
+module.exports.setPromiseLibrary = defaultInstance.setPromiseLibrary.bind(defaultInstance);
