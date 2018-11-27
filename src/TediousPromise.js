@@ -23,6 +23,16 @@ function TediousPromise(mode, option) {
   }
 
   this._mode = mode;
+  this._promiseLibrary = PromiseUtil.getNamedLibrary('q');
+
+  this._reset();
+
+  // function to rename columns if the name wasn't manually overriden
+  // i.e.:  _.camelCase
+  this.defaultColumnRenamer = null;
+}
+
+TediousPromise.prototype._reset = function () {
   this._sql = null;
   this._columns = {};
   this._parameters = {};
@@ -30,15 +40,10 @@ function TediousPromise(mode, option) {
   this._forEachRow = null;
   this._returnRowCount = false;
   this._transformRow = this.transformers.rowToObject;
-  this._promiseLibrary = PromiseUtil.getNamedLibrary('q');
 
   // Should only be set when the last function called created a column
   // Must reset to null on other functions
   this._lastColumn = null;
-
-  // function to rename columns if the name wasn't manually overriden
-  // i.e.:  _.camelCase
-  this.defaultColumnRenamer = null;
 }
 
 function enableDebugLogging(connection) {
@@ -250,7 +255,7 @@ TediousPromise.prototype._executeRequest = function (connection, fnName) {
       if (!this._transaction) {
         this._disposeConnection(connection);
       } else {
-        this._sql = null;
+        this._reset();
       }
 
       if (error) {
